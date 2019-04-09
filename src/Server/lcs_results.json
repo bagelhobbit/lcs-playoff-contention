@@ -338,5 +338,25 @@
   {
     "winner": "CLG",
     "loser": "100"
+  },
+  {
+    "winner": "GGS",
+    "loser": "FQ"
+  },
+  {
+    "winner": "FOX",
+    "loser": "CLG"
+  },
+  {
+    "winner": "C9",
+    "loser": "CG"
+  },
+  {
+    "winner": "TSM",
+    "loser": "TL"
+  },
+  {
+    "winner": "OPT",
+    "loser": "100"
   }
 ]

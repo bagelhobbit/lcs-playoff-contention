@@ -87,18 +87,32 @@ let safeComponents =
           str " powered by: "
           components ]
 
+let createTile teamRecord =
+    let createColumns (teams, results) result =
+        let createOpponentColumn matchResult =
+            Column.column [ ] [ str matchResult.opponent ]
+
+        let createWinLossColumn matchResult =
+            if matchResult.won
+            then Column.column [ Column.Modifiers [ Modifier.BackgroundColor (Color.IsSuccess) ] ] [ str "Win" ]
+            else Column.column [ Column.Modifiers [ Modifier.BackgroundColor (Color.IsDanger) ] ] [ str "Loss" ]
+
+        (teams @ [result |> createOpponentColumn], results @ [result |> createWinLossColumn])
+
+    let (opponents, records) =
+        teamRecord.results
+        |> List.fold createColumns ([],[])
+
+    Tile.child [ ]
+        [ Box.box' [ ]
+            [ Columns.columns [ ] ((Column.column [ ] [ Heading.h4 [] [ str teamRecord.team ] ])::opponents)
+              Columns.columns [ ] ((Column.column [ ] [ str (sprintf "%d - %d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ])::records) ] ]
+
 let showWinLoss record =
     match record with
     | Some teamRecord ->
-        let teamColumns, teamResultColumns = 
-            teamRecord 
-            |> List.fold (fun (teams, records) current -> 
-                    let teamColumn = Column.column [] [ Heading.h4 [] [ str current.team ] ]
-                    let recordColumn = Column.column [] [str (sprintf "%d - %d" current.winLoss.wins current.winLoss.losses )]
-                    (teams @ [teamColumn], records @ [recordColumn])
-                ) ([], [])
-        [ Columns.columns [] teamColumns
-          Columns.columns [] teamResultColumns ]
+        teamRecord 
+        |> List.map createTile
     | None _ ->
         []
 
@@ -110,18 +124,19 @@ let button txt onClick =
         [ str txt ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
-    div []
+    div [ ]
         [ Navbar.navbar [ Navbar.Color IsPrimary ]
             [ Navbar.Item.div [ ]
                 [ Heading.h2 [ ]
                     [ str "SAFE Template" ] ] ]
 
-          Section.section [] [
-            Container.container []
-                  [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered ) ] ]
-                      [ Heading.h3 [] [ str "LCS Spring 2019 Split Results"] ] ]
+          Section.section [ ] [
+            Container.container [ ]
+                [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered ) ] ]
+                    [ Heading.h3 [ ] [ str "LCS Spring 2019 Split Results"] ] ]
 
-            Container.container [] (showWinLoss model.TeamRecords) ]
+            Tile.ancestor [ ] 
+                [ Tile.parent [ Tile.IsVertical ] (showWinLoss model.TeamRecords) ] ]
 
           Footer.footer [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]

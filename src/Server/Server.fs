@@ -34,16 +34,16 @@ let getLcsSchedule : Schedule seq =
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
         let currentRecords = [
-            {team = "TL"; winLoss = generateWinLoss "TL" getLcsResults}
-            {team = "C9"; winLoss = generateWinLoss "C9" getLcsResults}
-            {team = "TSM"; winLoss = generateWinLoss "TSM" getLcsResults}
-            {team = "FQ"; winLoss = generateWinLoss "FQ"  getLcsResults}
-            {team = "GGS"; winLoss = generateWinLoss "GGS" getLcsResults}
-            {team = "CLG"; winLoss = generateWinLoss "CLG" getLcsResults}
-            {team = "FOX"; winLoss = generateWinLoss "FOX" getLcsResults}
-            {team = "OPT"; winLoss = generateWinLoss "OPT" getLcsResults}
-            {team = "CG"; winLoss = generateWinLoss "CG" getLcsResults}
-            {team = "100"; winLoss = generateWinLoss "100" getLcsResults}
+            { team = "TL"; winLoss = generateWinLoss "TL" getLcsResults; results = generateMatchResults "TL" getLcsResults }
+            { team = "C9"; winLoss = generateWinLoss "C9" getLcsResults; results = generateMatchResults "C9" getLcsResults }
+            { team = "TSM"; winLoss = generateWinLoss "TSM" getLcsResults; results = generateMatchResults "TSM" getLcsResults }
+            { team = "FQ"; winLoss = generateWinLoss "FQ"  getLcsResults; results = generateMatchResults "FQ" getLcsResults }
+            { team = "GGS"; winLoss = generateWinLoss "GGS" getLcsResults; results = generateMatchResults "GGS" getLcsResults }
+            { team = "CLG"; winLoss = generateWinLoss "CLG" getLcsResults; results = generateMatchResults "CLG" getLcsResults }
+            { team = "FOX"; winLoss = generateWinLoss "FOX" getLcsResults; results = generateMatchResults "FOX" getLcsResults }
+            { team = "OPT"; winLoss = generateWinLoss "OPT" getLcsResults; results = generateMatchResults "OPT" getLcsResults }
+            { team = "CG"; winLoss = generateWinLoss "CG" getLcsResults; results = generateMatchResults "CG" getLcsResults }
+            { team = "100"; winLoss = generateWinLoss "100" getLcsResults; results = generateMatchResults "100" getLcsResults }
         ]
 
         return currentRecords |> List.sortByDescending (fun record -> record.winLoss.wins)
