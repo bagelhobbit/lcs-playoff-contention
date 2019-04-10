@@ -30,3 +30,10 @@ module WinLoss =
         |> Seq.filter (isTeamInGame team)
         |> Seq.map (createMatchResult team)
         |> Seq.toList
+
+    
+    let generateTeamRecord results team =
+        { team = team
+          winLoss = generateWinLoss team results
+          results = generateMatchResults team results
+        }

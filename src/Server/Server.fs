@@ -21,32 +21,24 @@ let publicPath = Path.GetFullPath "../Client/public"
 
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
-let getLcsResults : ScheduleResult seq = 
+let getLcsResults = 
     let resultsFile = File.ReadAllText @"C:\Users\Evan\Documents\code\F#\PlayoffContentionWeb\src\Server\lcs_results.json"
     ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> {winner=game.Winner; loser=game.Loser})
-    
 
-let getLcsSchedule : Schedule seq = 
+let getLcsSchedule = 
     let scheduleFile = File.ReadAllText @"c:\users\evan\source\repos\PlayoffContention\PlayoffContention\lcs_remaining_schedule.json"
     ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> {team1=game.Team1; team2=game.Team2})
-
-
+    
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
-        let currentRecords = [
-            { team = "TL"; winLoss = generateWinLoss "TL" getLcsResults; results = generateMatchResults "TL" getLcsResults }
-            { team = "C9"; winLoss = generateWinLoss "C9" getLcsResults; results = generateMatchResults "C9" getLcsResults }
-            { team = "TSM"; winLoss = generateWinLoss "TSM" getLcsResults; results = generateMatchResults "TSM" getLcsResults }
-            { team = "FQ"; winLoss = generateWinLoss "FQ"  getLcsResults; results = generateMatchResults "FQ" getLcsResults }
-            { team = "GGS"; winLoss = generateWinLoss "GGS" getLcsResults; results = generateMatchResults "GGS" getLcsResults }
-            { team = "CLG"; winLoss = generateWinLoss "CLG" getLcsResults; results = generateMatchResults "CLG" getLcsResults }
-            { team = "FOX"; winLoss = generateWinLoss "FOX" getLcsResults; results = generateMatchResults "FOX" getLcsResults }
-            { team = "OPT"; winLoss = generateWinLoss "OPT" getLcsResults; results = generateMatchResults "OPT" getLcsResults }
-            { team = "CG"; winLoss = generateWinLoss "CG" getLcsResults; results = generateMatchResults "CG" getLcsResults }
-            { team = "100"; winLoss = generateWinLoss "100" getLcsResults; results = generateMatchResults "100" getLcsResults }
-        ]
+        let lcsTeams = ["100"; "C9"; "CG"; "CLG"; "FOX"; "FQ"; "GGS"; "OPT"; "TL"; "TSM"]
 
-        return currentRecords |> List.sortByDescending (fun record -> record.winLoss.wins)
+        let currentRecords = 
+            lcsTeams
+            |> List.map (generateTeamRecord getLcsResults)
+            |> List.sortByDescending (fun record -> record.winLoss.wins)
+
+        return currentRecords 
     }
 
 let playoffApi = {
