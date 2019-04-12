@@ -10,10 +10,12 @@ open Fable.PowerPack.Fetch
 open Thoth.Json
 
 open Shared
-open Shared.WinLoss
+open Shared.TeamRecord
 
 
 open Fulma
+open Shared
+open System.ComponentModel
 
 
 // The model holds data that you want to keep track of while the application is running
@@ -22,12 +24,14 @@ open Fulma
 // the initial value will be requested from server
 type Model = { 
     TeamRecords: Option<TeamRecord list>
+    PlayoffStatuses: Option<(string * PlayoffStatus) list>
 }
 
 // The Msg type defines what events/actions can occur while the application is running
 // the state of the application changes *only* in reaction to these events
 type Msg =
 | LcsRecordsLoaded of Result<TeamRecord list, exn>
+| LcsPlayoffStatusesLoaded of Result<(string * PlayoffStatus) list, exn>
 
 module Server =
 
@@ -41,10 +45,11 @@ module Server =
       |> Remoting.buildProxy<IPlayoffApi>
 
 let initialTeamRecord = Server.api.lcsTeamRecords
+let playoffStatuses = Server.api.lcsPlayoffStatuses
 
 // defines the initial state and initial command (= side-effect) of the application
 let init () : Model * Cmd<Msg> =
-    let initialModel = { TeamRecords = None }
+    let initialModel = { TeamRecords = None; PlayoffStatuses = None }
     let loadCountCmd =
         Cmd.ofAsync
             initialTeamRecord
@@ -54,18 +59,75 @@ let init () : Model * Cmd<Msg> =
     initialModel, loadCountCmd
 
 
-
 // The update function computes the next state of the application based on the current state and the incoming events/messages
 // It can also run side-effects (encoded as commands) like calling the server via Http.
 // these commands in turn, can dispatch messages to which the update function will react.
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
     | _, LcsRecordsLoaded (Ok initialTeamRecord) ->
-        let nextModel = {currentModel with TeamRecords = Some initialTeamRecord}
+        let nextModel = { currentModel with TeamRecords = Some initialTeamRecord }
+        let nextCmd = 
+            Cmd.ofAsync
+                playoffStatuses
+                initialTeamRecord
+                (Ok >> LcsPlayoffStatusesLoaded)
+                (Error >> LcsPlayoffStatusesLoaded)
+        nextModel, nextCmd
+    | { TeamRecords = Some _ }, LcsPlayoffStatusesLoaded (Ok initialStatuses) ->
+        let nextModel = { currentModel with PlayoffStatuses = Some initialStatuses }
         nextModel, Cmd.none
 
     | _ -> currentModel, Cmd.none
 
+let createTile playoffStatuses teamRecord =
+    let getStatusModifier team =
+        match playoffStatuses with
+        | Some statuses ->
+            let (_, status) = 
+                statuses
+                |> List.find (fun (t, _) -> t = team)
+            match status with
+            | Eliminated ->
+                Tile.CustomClass ("eliminated")
+            | Unknown ->
+                Tile.CustomClass ("")
+            | Clinched ->
+                Tile.CustomClass ("clinched")
+            | Bye ->
+                Tile.CustomClass ("bye")
+        | None ->
+            Tile.CustomClass ("")
+
+    let createTiles result =
+        let createOpponentTile =
+            Heading.h6 [ ] [ str result.opponent ]
+
+        let createWinLossTile =
+            if result.won
+            then Content.content [ Content.Modifiers [ Modifier.TextColor (Color.IsSuccess) ] ] [ Heading.h6 [ ] [ str "Win" ] ]
+            else Content.content [ Content.Modifiers [ Modifier.TextColor (Color.IsDanger) ] ] [ Heading.h6 [ ] [ str "Loss" ] ]
+
+        Tile.child [ ] [ createOpponentTile; createWinLossTile ]
+
+    let tiles =
+        teamRecord.results
+        |> List.map createTiles
+
+    let teamTile =
+        Tile.child [ ] 
+            [ Heading.h4 [ ] [ str teamRecord.team ]
+              Content.content [ ] [ Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ] ] ]
+
+    Notification.notification [ ] 
+        [ Tile.parent [ (getStatusModifier teamRecord.team) ] (teamTile::tiles) ]
+
+let showWinLoss records statuses =
+    match records with
+    | Some teamRecords ->
+        teamRecords
+        |> List.map (createTile statuses)
+    | None _ ->
+        []
 
 let safeComponents =
     let components =
@@ -87,42 +149,6 @@ let safeComponents =
           str " powered by: "
           components ]
 
-let createTile teamRecord =
-    let createColumns (teams, results) result =
-        let createOpponentColumn matchResult =
-            Column.column [ ] [ str matchResult.opponent ]
-
-        let createWinLossColumn matchResult =
-            if matchResult.won
-            then Column.column [ Column.Modifiers [ Modifier.BackgroundColor (Color.IsSuccess) ] ] [ str "Win" ]
-            else Column.column [ Column.Modifiers [ Modifier.BackgroundColor (Color.IsDanger) ] ] [ str "Loss" ]
-
-        (teams @ [result |> createOpponentColumn], results @ [result |> createWinLossColumn])
-
-    let (opponents, records) =
-        teamRecord.results
-        |> List.fold createColumns ([],[])
-
-    Tile.child [ ]
-        [ Box.box' [ ]
-            [ Columns.columns [ ] ((Column.column [ ] [ Heading.h4 [] [ str teamRecord.team ] ])::opponents)
-              Columns.columns [ ] ((Column.column [ ] [ str (sprintf "%d - %d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ])::records) ] ]
-
-let showWinLoss record =
-    match record with
-    | Some teamRecord ->
-        teamRecord 
-        |> List.map createTile
-    | None _ ->
-        []
-
-let button txt onClick =
-    Button.button
-        [ Button.IsFullWidth
-          Button.Color IsPrimary
-          Button.OnClick onClick ]
-        [ str txt ]
-
 let view (model : Model) (dispatch : Msg -> unit) =
     div [ ]
         [ Navbar.navbar [ Navbar.Color IsPrimary ]
@@ -135,8 +161,7 @@ let view (model : Model) (dispatch : Msg -> unit) =
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered ) ] ]
                     [ Heading.h3 [ ] [ str "LCS Spring 2019 Split Results"] ] ]
 
-            Tile.ancestor [ ] 
-                [ Tile.parent [ Tile.IsVertical ] (showWinLoss model.TeamRecords) ] ]
+            Tile.ancestor [ Tile.IsVertical ] (showWinLoss model.TeamRecords model.PlayoffStatuses) ]
 
           Footer.footer [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]

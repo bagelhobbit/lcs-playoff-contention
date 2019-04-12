@@ -1,12 +1,16 @@
 namespace Shared
 
-module WinLoss = 
+module TeamRecord = 
 
     open Schedule
 
     type WinLoss = { wins: int; losses: int }
-    type MatchResult = { opponent: string; won: bool } 
-    type TeamRecord = { team: string; winLoss: WinLoss; results: MatchResult list }
+    type MatchResult = { opponent: string; won: bool }
+    type TeamRecord = 
+        { team: string
+          winLoss: WinLoss
+          results: MatchResult list
+        }
 
     let private isTeamInGame team result =
         result.winner = team || result.loser = team
@@ -31,7 +35,6 @@ module WinLoss =
         |> Seq.map (createMatchResult team)
         |> Seq.toList
 
-    
     let generateTeamRecord results team =
         { team = team
           winLoss = generateWinLoss team results

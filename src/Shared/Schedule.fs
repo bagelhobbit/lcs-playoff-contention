@@ -1,6 +1,6 @@
 namespace Shared
 
-module Schedule = 
+module Schedule =
     open FSharp.Data
 
     type ScheduleResult = {winner: string; loser: string}

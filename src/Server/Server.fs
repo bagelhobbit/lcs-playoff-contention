@@ -8,12 +8,12 @@ open Giraffe
 open Saturn
 open Shared
 open Shared.Schedule
-open Shared.WinLoss
+open Shared.TeamRecord
 
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
-
-open WinLoss
+open EliminatedTeams
+open PlayoffTeams
 
 let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" -> None | x -> Some x
 
@@ -21,14 +21,16 @@ let publicPath = Path.GetFullPath "../Client/public"
 
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
+let totalLcsGames = 18
+
 let getLcsResults = 
     let resultsFile = File.ReadAllText @"C:\Users\Evan\Documents\code\F#\PlayoffContentionWeb\src\Server\lcs_results.json"
     ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> {winner=game.Winner; loser=game.Loser})
 
-let getLcsSchedule = 
+let getRemainingLcsSchedule = 
     let scheduleFile = File.ReadAllText @"c:\users\evan\source\repos\PlayoffContention\PlayoffContention\lcs_remaining_schedule.json"
     ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> {team1=game.Team1; team2=game.Team2})
-    
+
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
         let lcsTeams = ["100"; "C9"; "CG"; "CLG"; "FOX"; "FQ"; "GGS"; "OPT"; "TL"; "TSM"]
@@ -41,8 +43,39 @@ let getCurrentRecords() : Task<TeamRecord list> =
         return currentRecords 
     }
 
+let getLcsPlayoffStatuses teamRecords : Task<(string * PlayoffStatus) list> =
+    task {
+        let eliminatedTeams = 
+            findEliminatedTeams teamRecords getRemainingLcsSchedule totalLcsGames 
+            |> List.map (fun team -> team.team)
+
+        let playoffTeams =
+            findPlayoffTeams teamRecords totalLcsGames
+            |> List.map (fun team -> team.team)
+
+        let playoffByes =
+            findPlayoffByes teamRecords totalLcsGames
+            |> List.map (fun team -> team.team)
+
+        let assignPlayoffStatus team =
+            if eliminatedTeams |> List.contains team.team
+            then (team.team, PlayoffStatus.Eliminated)
+            else 
+                if playoffByes |> List.contains team.team
+                then (team.team, PlayoffStatus.Bye)
+                else
+                    if playoffTeams |> List.contains team.team
+                    then (team.team, PlayoffStatus.Clinched)
+                    else (team.team, PlayoffStatus.Unknown)
+
+        return teamRecords
+        |> List.map assignPlayoffStatus
+    }
+
+
 let playoffApi = {
     lcsTeamRecords = getCurrentRecords >> Async.AwaitTask
+    lcsPlayoffStatuses = getLcsPlayoffStatuses >> Async.AwaitTask
 }
 
 let webApp =

@@ -1,0 +1,17 @@
+.eliminated {
+    border-left-color: #ff3860;
+    border-left-style: solid;
+    border-left-width: thick;
+}
+
+.clinched {
+    border-left-color: #23d160;
+    border-left-style: solid;
+    border-left-width: thick;
+}
+
+.bye {
+    border-left-color: #3273DC;
+    border-left-style: solid;
+    border-left-width: thick;
+}
