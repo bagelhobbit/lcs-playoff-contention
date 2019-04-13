@@ -1,6 +1,6 @@
-# SAFE Template
+# LCS Playoff Contention
 
-This template can be used to generate a full-stack web application using the [SAFE Stack](https://safe-stack.github.io/). It was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/). If you want to learn more about the template why not start with the [quick start](https://safe-stack.github.io/docs/quickstart/) guide?
+This application was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/).
 
 ## Install pre-requisites
 
@@ -19,7 +19,6 @@ To concurrently run the server and the client components in watch mode use the f
 ```bash
 fake build -t Run
 ```
-
 
 ## SAFE Stack Documentation
 

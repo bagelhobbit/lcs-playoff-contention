@@ -15,7 +15,6 @@ open Shared.TeamRecord
 
 open Fulma
 open Shared
-open System.ComponentModel
 
 
 // The model holds data that you want to keep track of while the application is running
@@ -88,15 +87,15 @@ let createTile playoffStatuses teamRecord =
                 |> List.find (fun (t, _) -> t = team)
             match status with
             | Eliminated ->
-                Tile.CustomClass ("eliminated")
+                Tile.CustomClass ("eliminated team")
             | Unknown ->
-                Tile.CustomClass ("")
+                Tile.CustomClass ("team")
             | Clinched ->
-                Tile.CustomClass ("clinched")
+                Tile.CustomClass ("clinched team")
             | Bye ->
-                Tile.CustomClass ("bye")
+                Tile.CustomClass ("bye team")
         | None ->
-            Tile.CustomClass ("")
+            Tile.CustomClass ("team")
 
     let createTiles result =
         let createOpponentTile =
@@ -104,8 +103,8 @@ let createTile playoffStatuses teamRecord =
 
         let createWinLossTile =
             if result.won
-            then Content.content [ Content.Modifiers [ Modifier.TextColor (Color.IsSuccess) ] ] [ Heading.h6 [ ] [ str "Win" ] ]
-            else Content.content [ Content.Modifiers [ Modifier.TextColor (Color.IsDanger) ] ] [ Heading.h6 [ ] [ str "Loss" ] ]
+            then Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsSuccess) ] ] [ str "Win" ]
+            else Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsDanger) ] ] [ str "Loss" ]
 
         Tile.child [ ] [ createOpponentTile; createWinLossTile ]
 
@@ -116,10 +115,9 @@ let createTile playoffStatuses teamRecord =
     let teamTile =
         Tile.child [ ] 
             [ Heading.h4 [ ] [ str teamRecord.team ]
-              Content.content [ ] [ Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ] ] ]
+              Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ] ]
 
-    Notification.notification [ ] 
-        [ Tile.parent [ (getStatusModifier teamRecord.team) ] (teamTile::tiles) ]
+    Tile.parent [ (getStatusModifier teamRecord.team); Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] (teamTile::tiles)
 
 let showWinLoss records statuses =
     match records with
@@ -159,7 +157,7 @@ let view (model : Model) (dispatch : Msg -> unit) =
           Section.section [ ] [
             Container.container [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered ) ] ]
-                    [ Heading.h3 [ ] [ str "LCS Spring 2019 Split Results"] ] ]
+                    [ Heading.h2 [ ] [ str "LCS 2019 Spring Split Results"] ] ]
 
             Tile.ancestor [ Tile.IsVertical ] (showWinLoss model.TeamRecords model.PlayoffStatuses) ]
 
