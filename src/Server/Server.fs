@@ -24,11 +24,11 @@ let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValu
 let totalLcsGames = 18
 
 let getLcsResults = 
-    let resultsFile = File.ReadAllText @"C:\Users\Evan\Documents\code\F#\PlayoffContentionWeb\src\Server\lcs_results.json"
+    let resultsFile = File.ReadAllText @"lcs_results.json"
     ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> {winner=game.Winner; loser=game.Loser})
 
 let getRemainingLcsSchedule = 
-    let scheduleFile = File.ReadAllText @"c:\users\evan\source\repos\PlayoffContention\PlayoffContention\lcs_remaining_schedule.json"
+    let scheduleFile = File.ReadAllText @"lcs_remaining_schedule.json"
     ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> {team1=game.Team1; team2=game.Team2})
 
 let getCurrentRecords() : Task<TeamRecord list> =
