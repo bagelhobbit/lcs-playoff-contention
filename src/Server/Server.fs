@@ -6,14 +6,16 @@ open Microsoft.Extensions.DependencyInjection
 open FSharp.Control.Tasks.V2
 open Giraffe
 open Saturn
+
 open Shared
 open Shared.Schedule
+open HeadToHead
 open Shared.TeamRecord
+open EliminatedTeams
+open PlayoffTeams
 
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
-open EliminatedTeams
-open PlayoffTeams
 
 let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" -> None | x -> Some x
 
@@ -35,10 +37,26 @@ let getCurrentRecords() : Task<TeamRecord list> =
     task {
         let lcsTeams = ["100"; "C9"; "CG"; "CLG"; "FOX"; "FQ"; "GGS"; "OPT"; "TL"; "TSM"]
 
+        let lcsResults = getLcsResults
+
+        let descendingComparer team1 team2 =
+            // 1 - x > y; 0 - x = y; -1 - x < y
+            // Reverse the comparer so teams with a better head to head record are at the top
+            if team1.winLoss = team2.winLoss
+            then 
+                let headToHead = generateHeadToHeadResult team1.team team2.team lcsResults
+
+                match headToHead with
+                | Win -> -1
+                | Tie -> 0
+                | Loss -> 1
+            else 0
+
         let currentRecords = 
             lcsTeams
-            |> List.map (generateTeamRecord getLcsResults)
+            |> List.map (generateTeamRecord lcsResults)
             |> List.sortByDescending (fun record -> record.winLoss.wins)
+            |> List.sortWith descendingComparer
 
         return currentRecords 
     }
