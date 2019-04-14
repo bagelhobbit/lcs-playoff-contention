@@ -1,5 +1,7 @@
 # LCS Playoff Contention
 
+Displays and calculates the standings and playoff positions for the LCS regular season.
+
 This application was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/).
 
 ## Install pre-requisites
@@ -18,6 +20,12 @@ To concurrently run the server and the client components in watch mode use the f
 
 ```bash
 fake build -t Run
+```
+
+To build the docker images run:
+
+```bash
+fake build -t docker
 ```
 
 ## SAFE Stack Documentation
