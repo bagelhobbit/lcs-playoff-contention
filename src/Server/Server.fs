@@ -76,15 +76,15 @@ let getLcsPlayoffStatuses teamRecords : Task<(string * PlayoffStatus) list> =
             |> List.map (fun team -> team.team)
 
         let assignPlayoffStatus team =
-            if eliminatedTeams |> List.contains team.team
-            then (team.team, PlayoffStatus.Eliminated)
-            else 
-                if playoffByes |> List.contains team.team
-                then (team.team, PlayoffStatus.Bye)
-                else
-                    if playoffTeams |> List.contains team.team
-                    then (team.team, PlayoffStatus.Clinched)
-                    else (team.team, PlayoffStatus.Unknown)
+            let containsTeam =
+                [ eliminatedTeams; playoffTeams; playoffByes ]
+                |> List.map (List.contains team.team)
+
+            match containsTeam with
+            | _::_::[x] when x -> (team.team, Bye)
+            | _::x::_ when x -> (team.team, Clinched)
+            | x::_ when x -> (team.team, Eliminated)
+            | _ -> (team.team, Unknown)
 
         return teamRecords
         |> List.map assignPlayoffStatus
