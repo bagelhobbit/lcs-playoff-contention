@@ -4,6 +4,12 @@ Displays and calculates the standings and playoff positions for the LCS regular 
 
 This application was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/).
 
+To start simply run:
+
+```bash
+docker-compose up -d
+```
+
 ## Install pre-requisites
 
 You'll need to install the following pre-requisites in order to build SAFE applications
