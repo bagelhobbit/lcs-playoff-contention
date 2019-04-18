@@ -25,13 +25,34 @@ You'll need to install the following pre-requisites in order to build SAFE appli
 To concurrently run the server and the client components in watch mode use the following command:
 
 ```bash
-fake build -t Run
+fake build -t run
 ```
 
-To build the docker images run:
+### Docker
+
+Building the docker image:
 
 ```bash
-fake build -t docker
+fake build -t docker <DockerUser> <DockerImageName>
+```
+
+or
+
+```bash
+.\build.cmd
+```
+
+Pushing the docker image:
+
+```bash
+# Login server defaults to 'docker.io'
+fake build -t deploy <DockerUser> <DockerImageName> <DockerPassword> [DockerLoginServer]
+```
+
+or
+
+```bash
+.\release.cmd
 ```
 
 ## SAFE Stack Documentation

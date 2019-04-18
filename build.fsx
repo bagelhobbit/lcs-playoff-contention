@@ -100,10 +100,6 @@ Target.create "Run" (fun _ ->
     |> ignore
 )
 
-let buildDocker tag =
-    let args = sprintf "build -t %s ." tag
-    runTool "docker" args "."
-
 Target.create "Bundle" (fun _ ->
     let serverDir = Path.combine deployDir "Server"
     let clientDir = Path.combine deployDir "Client"
@@ -115,12 +111,36 @@ Target.create "Bundle" (fun _ ->
     Shell.copyDir publicDir clientDeployPath FileFilter.allFiles
 )
 
-let dockerUser = "evanturner"
-let dockerImageName = "playoff-contention"
-let dockerFullName = sprintf "%s/%s" dockerUser dockerImageName
+let buildDocker tag =
+    let args = sprintf "build -t %s ." tag
+    runTool "docker" args "."
 
-Target.create "Docker" (fun _ ->
+Target.create "Docker" (fun p ->
+    let dockerFullName =
+        match p.Context.Arguments with
+        | [] | [_] ->
+            failwith "Expected <DockerUser> <DockerImageName>."
+        | dockerUser::dockerImageName::_ ->
+            sprintf "%s/%s" dockerUser dockerImageName
     buildDocker dockerFullName
+)
+
+Target.create "Deploy" (fun p -> 
+    let (loginArgs, pushArgs)  =
+        match p.Context.Arguments with
+        | [] | [_] | [_;_] ->
+            failwith "Expected <DockerUser> <DockerImageName> <DockerPassword> [DockerLoginServer]."
+        | dockerUser::dockerImageName::[dockerPassword] ->
+            let login = sprintf "login docker.io --username %s --password %s" dockerUser dockerPassword 
+            let push = sprintf "push %s/%s" dockerUser dockerImageName
+            (login, push)
+        | dockerUser::dockerImageName::dockerPassword::dockerLoginServer::_ ->
+            let login = sprintf "login %s --username %s --password %s" dockerLoginServer dockerUser dockerPassword 
+            let push = sprintf "push %s/%s" dockerUser dockerImageName
+            (login, push)
+
+    runTool "docker" loginArgs  __SOURCE_DIRECTORY__
+    runTool "docker" pushArgs  __SOURCE_DIRECTORY__
 )
 
 
@@ -134,6 +154,7 @@ open Fake.Core.TargetOperators
     ==> "Build"
     ==> "Bundle"
     ==> "Docker"
+    ==> "Deploy"
 
 
 "Clean"
