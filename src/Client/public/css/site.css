@@ -1,17 +1,17 @@
-.eliminated {
-    border-left-color: #ff3860;
-    border-left-style: solid;
-    border-left-width: thick;
-}
-
-.clinched {
+.bye {
     border-left-color: #23d160;
     border-left-style: solid;
     border-left-width: thick;
 }
 
-.bye {
+.clinched {
     border-left-color: #3273DC;
+    border-left-style: solid;
+    border-left-width: thick;
+}
+
+.eliminated {
+    border-left-color: #ff3860;
     border-left-style: solid;
     border-left-width: thick;
 }
@@ -26,4 +26,12 @@
 
 .team:first-child {
     margin-top: 1.5rem;
+}
+
+.legend {
+    display: inline-block;
+    height: 16px;
+    margin-left: 16px;
+    margin-right: 4px;
+    width: 16px;
 }

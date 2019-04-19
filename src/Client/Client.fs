@@ -156,8 +156,19 @@ let view (model : Model) (dispatch : Msg -> unit) =
 
           Section.section [ ] [
             Container.container [ ]
-                [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered ) ] ]
+                [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
                     [ Heading.h2 [ ] [ str "LCS 2019 Spring Split Results"] ] ]
+
+            Container.container [ ]
+                [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
+                    [ Heading.h6 [ ] 
+                        [ str ""
+                          span [ ClassName "legend has-background-success"] [ ]
+                          str "Clinch Bye" 
+                          span [ ClassName "legend has-background-link" ] [ ]
+                          str "Clinch Playoffs" 
+                          span [ ClassName "legend has-background-danger" ] [ ]
+                          str "Eliminated" ] ] ]
 
             Tile.ancestor [ Tile.IsVertical ] (showWinLoss model.TeamRecords model.PlayoffStatuses) ]
 
