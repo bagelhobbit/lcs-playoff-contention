@@ -1,29 +1,32 @@
-module Client
+module Client.App
 
 open Elmish
 open Elmish.React
+open Elmish.Navigation
 
 open Fable.React
-open Fable.React.Props
-
-open Thoth.Json
 
 open Shared
 open Shared.TeamRecord
-
+open Client.Pages
+open Client.Styles
 
 open Fulma
-open Shared
 
+type PageModel =
+    | HomePageModel
+    | HeadToHeadPageModel
 
 type Model = { 
     TeamRecords: Option<TeamRecord list>
     PlayoffStatuses: Option<(string * PlayoffStatus) list>
+    PageModel: PageModel
 }
 
 type Msg =
-| LcsRecordsLoaded of Result<TeamRecord list, exn>
-| LcsPlayoffStatusesLoaded of Result<(string * PlayoffStatus) list, exn>
+    | TeamRecordsLoaded of Result<TeamRecord list, exn>
+    | PlayoffStatusesLoaded of Result<(string * PlayoffStatus) list, exn>
+    | HeadToHead
 
 module Server =
 
@@ -39,103 +42,52 @@ module Server =
 let initialTeamRecord = Server.api.lcsTeamRecords
 let playoffStatuses = Server.api.lcsPlayoffStatuses
 
-// defines the initial state and initial command (= side-effect) of the application
-let init () : Model * Cmd<Msg> =
-    let initialModel = { TeamRecords = None; PlayoffStatuses = None }
+let urlUpdate (result:Page option) (model:Model) =
+    match result with
+    | None ->
+        model, Navigation.modifyUrl (toPath Page.Home)
+    | Some Page.Home ->
+        { model with PageModel = HomePageModel }, Cmd.none
+    | Some Page.HeadToHead ->
+        { model with PageModel = HeadToHeadPageModel }, Cmd.none
+
+// Use the page parameter to make `toNavigatable` happys
+let init page : Model * Cmd<Msg> =
+    let initialModel = 
+        { TeamRecords = None
+          PlayoffStatuses = None
+          PageModel = HomePageModel }
     let loadCountCmd =
         Cmd.OfAsync.either
             initialTeamRecord
             ()
-            (Ok >> LcsRecordsLoaded)
-            (Error >> LcsRecordsLoaded)
+            (Ok >> TeamRecordsLoaded)
+            (Error >> TeamRecordsLoaded)
     initialModel, loadCountCmd
 
 
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
-    | _, LcsRecordsLoaded (Ok initialTeamRecord) ->
+    | _, TeamRecordsLoaded (Ok initialTeamRecord) ->
         let nextModel = { currentModel with TeamRecords = Some initialTeamRecord }
         let nextCmd = 
             Cmd.OfAsync.either
                 playoffStatuses
                 initialTeamRecord
-                (Ok >> LcsPlayoffStatusesLoaded)
-                (Error >> LcsPlayoffStatusesLoaded)
+                (Ok >> PlayoffStatusesLoaded)
+                (Error >> PlayoffStatusesLoaded)
         nextModel, nextCmd
-    | { TeamRecords = Some _ }, LcsPlayoffStatusesLoaded (Ok initialStatuses) ->
+
+    | { TeamRecords = Some _ }, PlayoffStatusesLoaded (Ok initialStatuses) ->
         let nextModel = { currentModel with PlayoffStatuses = Some initialStatuses }
         nextModel, Cmd.none
 
-    | _ -> currentModel, Cmd.none
+    | _, HeadToHead ->
+        let nextModel = { currentModel with PageModel = HeadToHeadPageModel }
+        nextModel, Cmd.none
 
-let createTile playoffStatuses teamRecord =
-    let getStatusModifier team =
-        match playoffStatuses with
-        | Some statuses ->
-            let (_, status) = 
-                statuses
-                |> List.find (fun (t, _) -> t = team)
-            match status with
-            | Eliminated ->
-                Tile.CustomClass ("eliminated team")
-            | Unknown ->
-                Tile.CustomClass ("team")
-            | Clinched ->
-                Tile.CustomClass ("clinched team")
-            | Bye ->
-                Tile.CustomClass ("bye team")
-        | None ->
-            Tile.CustomClass ("team")
-
-    let createTiles result =
-        let createOpponentTile =
-            Heading.h6 [ ] [ str result.opponent ]
-
-        let createWinLossTile =
-            if result.won
-            then Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsSuccess) ] ] [ str "Win" ]
-            else Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsDanger) ] ] [ str "Loss" ]
-
-        Tile.child [ ] [ createOpponentTile; createWinLossTile ]
-
-    let tiles =
-        teamRecord.results
-        |> List.map createTiles
-
-    let teamTile =
-        Tile.child [ ] 
-            [ Heading.h4 [ ] [ str teamRecord.team ]
-              Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ] ]
-
-    Tile.parent [ (getStatusModifier teamRecord.team); Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] (teamTile::tiles)
-
-let showWinLoss records statuses =
-    match records with
-    | Some teamRecords ->
-        teamRecords
-        |> List.map (createTile statuses)
-    | None _ ->
-        []
-
-let safeComponents =
-    let components =
-        span [ ]
-           [
-             a [ Href "https://saturnframework.github.io" ] [ str "Saturn" ]
-             str ", "
-             a [ Href "http://fable.io" ] [ str "Fable" ]
-             str ", "
-             a [ Href "https://elmish.github.io/elmish/" ] [ str "Elmish" ]
-             str ", "
-             a [ Href "https://fulma.github.io/Fulma" ] [ str "Fulma" ]
-             str ", "
-             a [ Href "https://zaid-ajaj.github.io/Fable.Remoting/" ] [ str "Fable.Remoting" ]
-           ]
-
-    p [ ]
-        [ strong [] [ str "SAFE Template" ]
-          str " powered by: "
-          components ]
+    | _ ->
+        currentModel, Cmd.none
 
 let view (model : Model) (dispatch : Msg -> unit) =
     div [ ]
@@ -144,23 +96,15 @@ let view (model : Model) (dispatch : Msg -> unit) =
                 [ Heading.h2 [ ]
                     [ str "LCS Playoff Contention" ] ] ]
 
+          viewLink Page.HeadToHead "Head to Heads"
+
           Section.section [ ] [
-            Container.container [ ]
-                [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-                    [ Heading.h2 [ ] [ str "LCS 2019 Spring Split Results"] ] ]
-
-            Container.container [ ]
-                [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-                    [ Heading.h6 [ ] 
-                        [ str ""
-                          span [ ClassName "legend has-background-success"] [ ]
-                          str "Clinch Bye" 
-                          span [ ClassName "legend has-background-link" ] [ ]
-                          str "Clinch Playoffs" 
-                          span [ ClassName "legend has-background-danger" ] [ ]
-                          str "Eliminated" ] ] ]
-
-            Tile.ancestor [ Tile.IsVertical ] (showWinLoss model.TeamRecords model.PlayoffStatuses) ]
+            match model.PageModel with
+            | HomePageModel ->
+                yield Home.view { Records = model.TeamRecords; PlayoffStatuses = model.PlayoffStatuses }
+            | HeadToHeadPageModel ->
+                yield div [ ] [ str "TEST" ]
+          ]
 
           Footer.footer [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
@@ -171,6 +115,7 @@ open Elmish.Debug
 #endif
 
 Program.mkProgram init update view
+|> Program.toNavigable Pages.urlParser urlUpdate
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
