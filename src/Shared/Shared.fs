@@ -5,6 +5,9 @@ module Route =
     let builder typeName methodName =
         sprintf "/api/%s/%s" typeName methodName
 
+module Constants =
+    let totalLcsGames = 18
+
 open TeamRecord
 
 type PlayoffStatus = Bye | Clinched | Unknown | Eliminated

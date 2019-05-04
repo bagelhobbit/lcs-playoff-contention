@@ -1,12 +1,13 @@
 module PlayoffTeams
 
+open Shared
 open Shared.Schedule
 open Shared.TeamRecord
 
-let findPlayoffTeams teamRecords totalGames =
+let findPlayoffTeams teamRecords =
     let remainingGames =
         let currentGames = List.head teamRecords |> (fun x -> x.winLoss.wins + x.winLoss.losses)
-        totalGames - currentGames
+        Constants.totalLcsGames - currentGames
 
     let minimunRequiredWins =
         let minWins =
@@ -27,10 +28,10 @@ let findPlayoffTeams teamRecords totalGames =
     teamRecords
     |> List.filter (fun team -> team.winLoss.wins + remainingGames > minimunRequiredWins)
 
-let findPlayoffByes teamRecords totalGames =
+let findPlayoffByes teamRecords =
     let remainingGames =
         let currentGames = List.head teamRecords |> (fun x -> x.winLoss.wins + x.winLoss.losses)
-        totalGames - currentGames
+        Constants.totalLcsGames - currentGames
 
     if remainingGames = 0
     then

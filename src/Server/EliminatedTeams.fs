@@ -1,12 +1,13 @@
 module EliminatedTeams
 
+open Shared
 open Shared.Schedule
 open Shared.TeamRecord
 
-let findEliminatedTeams teamRecords futureSchedule totalGames =
+let findEliminatedTeams teamRecords futureSchedule =
     let remainingGames =
         let currentGames = List.head teamRecords |> (fun x -> x.winLoss.wins + x.winLoss.losses)
-        totalGames - currentGames
+        Constants.totalLcsGames - currentGames
 
     let minimunRequiredWins =
         let minWins =

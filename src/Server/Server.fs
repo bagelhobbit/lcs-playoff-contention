@@ -1,10 +1,7 @@
 open System.IO
 open System.Threading.Tasks
 
-open Microsoft.AspNetCore.Builder
-open Microsoft.Extensions.DependencyInjection
 open FSharp.Control.Tasks.V2
-open Giraffe
 open Saturn
 
 open Shared
@@ -22,8 +19,6 @@ let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" 
 let publicPath = Path.GetFullPath "../Client/public"
 
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
-
-let totalLcsGames = 18
 
 let getLcsResults = 
     let resultsFile = File.ReadAllText @"lcs_results.json"
@@ -64,15 +59,15 @@ let getCurrentRecords() : Task<TeamRecord list> =
 let getLcsPlayoffStatuses teamRecords : Task<(string * PlayoffStatus) list> =
     task {
         let eliminatedTeams = 
-            findEliminatedTeams teamRecords getRemainingLcsSchedule totalLcsGames 
+            findEliminatedTeams teamRecords getRemainingLcsSchedule 
             |> List.map (fun team -> team.team)
 
         let playoffTeams =
-            findPlayoffTeams teamRecords totalLcsGames
+            findPlayoffTeams teamRecords
             |> List.map (fun team -> team.team)
 
         let playoffByes =
-            findPlayoffByes teamRecords totalLcsGames
+            findPlayoffByes teamRecords
             |> List.map (fun team -> team.team)
 
         let assignPlayoffStatus team =
