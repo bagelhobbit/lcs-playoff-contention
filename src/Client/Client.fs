@@ -3,9 +3,8 @@ module Client
 open Elmish
 open Elmish.React
 
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
-open Fable.PowerPack.Fetch
+open Fable.React
+open Fable.React.Props
 
 open Thoth.Json
 
@@ -17,17 +16,11 @@ open Fulma
 open Shared
 
 
-// The model holds data that you want to keep track of while the application is running
-// in this case, we are keeping track of a counter
-// we mark it as optional, because initially it will not be available from the client
-// the initial value will be requested from server
 type Model = { 
     TeamRecords: Option<TeamRecord list>
     PlayoffStatuses: Option<(string * PlayoffStatus) list>
 }
 
-// The Msg type defines what events/actions can occur while the application is running
-// the state of the application changes *only* in reaction to these events
 type Msg =
 | LcsRecordsLoaded of Result<TeamRecord list, exn>
 | LcsPlayoffStatusesLoaded of Result<(string * PlayoffStatus) list, exn>
@@ -50,7 +43,7 @@ let playoffStatuses = Server.api.lcsPlayoffStatuses
 let init () : Model * Cmd<Msg> =
     let initialModel = { TeamRecords = None; PlayoffStatuses = None }
     let loadCountCmd =
-        Cmd.ofAsync
+        Cmd.OfAsync.either
             initialTeamRecord
             ()
             (Ok >> LcsRecordsLoaded)
@@ -58,15 +51,12 @@ let init () : Model * Cmd<Msg> =
     initialModel, loadCountCmd
 
 
-// The update function computes the next state of the application based on the current state and the incoming events/messages
-// It can also run side-effects (encoded as commands) like calling the server via Http.
-// these commands in turn, can dispatch messages to which the update function will react.
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
     | _, LcsRecordsLoaded (Ok initialTeamRecord) ->
         let nextModel = { currentModel with TeamRecords = Some initialTeamRecord }
         let nextCmd = 
-            Cmd.ofAsync
+            Cmd.OfAsync.either
                 playoffStatuses
                 initialTeamRecord
                 (Ok >> LcsPlayoffStatusesLoaded)
@@ -178,15 +168,13 @@ let view (model : Model) (dispatch : Msg -> unit) =
 
 #if DEBUG
 open Elmish.Debug
-open Elmish.HMR
 #endif
 
 Program.mkProgram init update view
 #if DEBUG
 |> Program.withConsoleTrace
-|> Program.withHMR
 #endif
-|> Program.withReact "elmish-app"
+|> Program.withReactBatched "elmish-app"
 #if DEBUG
 |> Program.withDebugger
 #endif
