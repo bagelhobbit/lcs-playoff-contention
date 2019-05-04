@@ -22,11 +22,11 @@ let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValu
 
 let getLcsResults = 
     let resultsFile = File.ReadAllText @"lcs_results.json"
-    ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> {winner=game.Winner; loser=game.Loser})
+    ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> { winner=game.Winner; loser=game.Loser })
 
 let getRemainingLcsSchedule = 
     let scheduleFile = File.ReadAllText @"lcs_remaining_schedule.json"
-    ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> {team1=game.Team1; team2=game.Team2})
+    ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> { team1=game.Team1; team2=game.Team2 })
 
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
@@ -85,10 +85,17 @@ let getLcsPlayoffStatuses teamRecords : Task<(string * PlayoffStatus) list> =
         |> List.map assignPlayoffStatus
     }
 
+let getHeadToHeads team : Task<HeadToHead list> =
+    task {
+        let lcsResults = getLcsResults
+
+        return generateHeadToHeads team lcsResults
+    }
 
 let playoffApi = {
     lcsTeamRecords = getCurrentRecords >> Async.AwaitTask
     lcsPlayoffStatuses = getLcsPlayoffStatuses >> Async.AwaitTask
+    teamHeadToHeadRecords = getHeadToHeads >> Async.AwaitTask
 }
 
 let webApp =

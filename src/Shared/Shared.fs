@@ -9,6 +9,7 @@ module Constants =
     let totalLcsGames = 18
 
 open TeamRecord
+open HeadToHead
 
 type PlayoffStatus = Bye | Clinched | Unknown | Eliminated
 
@@ -17,4 +18,5 @@ type PlayoffStatus = Bye | Clinched | Unknown | Eliminated
 type IPlayoffApi = { 
     lcsTeamRecords : unit -> Async<TeamRecord list>
     lcsPlayoffStatuses : TeamRecord list -> Async<(string * PlayoffStatus) list>
+    teamHeadToHeadRecords : string -> Async<HeadToHead list>
 }

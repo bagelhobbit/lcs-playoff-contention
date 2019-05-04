@@ -8,6 +8,7 @@ open Fable.React
 
 open Shared
 open Shared.TeamRecord
+open Shared.HeadToHead
 open Client.Pages
 open Client.Styles
 
@@ -20,13 +21,14 @@ type PageModel =
 type Model = { 
     TeamRecords: Option<TeamRecord list>
     PlayoffStatuses: Option<(string * PlayoffStatus) list>
+    HeadToHeadResults: Option<HeadToHead list>
     PageModel: PageModel
 }
 
 type Msg =
     | TeamRecordsLoaded of Result<TeamRecord list, exn>
     | PlayoffStatusesLoaded of Result<(string * PlayoffStatus) list, exn>
-    | HeadToHead
+    | HeadToHeadResult of Result<HeadToHead list, exn>
 
 module Server =
 
@@ -41,6 +43,7 @@ module Server =
 
 let initialTeamRecord = Server.api.lcsTeamRecords
 let playoffStatuses = Server.api.lcsPlayoffStatuses
+let headToHeadResults = Server.api.teamHeadToHeadRecords
 
 let urlUpdate (result:Page option) (model:Model) =
     match result with
@@ -48,21 +51,27 @@ let urlUpdate (result:Page option) (model:Model) =
         model, Navigation.modifyUrl (toPath Page.Home)
     | Some Page.Home ->
         { model with PageModel = HomePageModel }, Cmd.none
-    | Some Page.HeadToHead ->
-        { model with PageModel = HeadToHeadPageModel }, Cmd.none
+    | Some (Page.HeadToHead team) ->
+        let nextModel = { model with PageModel = HeadToHeadPageModel }
+        let nextCmd =
+            Cmd.OfAsync.perform
+                headToHeadResults
+                team
+                (Ok >> HeadToHeadResult)
+        nextModel, nextCmd
 
 // Use the page parameter to make `toNavigatable` happys
 let init page : Model * Cmd<Msg> =
     let initialModel = 
         { TeamRecords = None
           PlayoffStatuses = None
+          HeadToHeadResults = None
           PageModel = HomePageModel }
     let loadCountCmd =
-        Cmd.OfAsync.either
+        Cmd.OfAsync.perform
             initialTeamRecord
             ()
             (Ok >> TeamRecordsLoaded)
-            (Error >> TeamRecordsLoaded)
     initialModel, loadCountCmd
 
 
@@ -71,19 +80,18 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     | _, TeamRecordsLoaded (Ok initialTeamRecord) ->
         let nextModel = { currentModel with TeamRecords = Some initialTeamRecord }
         let nextCmd = 
-            Cmd.OfAsync.either
+            Cmd.OfAsync.perform
                 playoffStatuses
                 initialTeamRecord
                 (Ok >> PlayoffStatusesLoaded)
-                (Error >> PlayoffStatusesLoaded)
         nextModel, nextCmd
 
     | { TeamRecords = Some _ }, PlayoffStatusesLoaded (Ok initialStatuses) ->
         let nextModel = { currentModel with PlayoffStatuses = Some initialStatuses }
         nextModel, Cmd.none
 
-    | _, HeadToHead ->
-        let nextModel = { currentModel with PageModel = HeadToHeadPageModel }
+    | { PageModel = HeadToHeadPageModel }, HeadToHeadResult (Ok results) ->
+        let nextModel = { currentModel with HeadToHeadResults = Some results}
         nextModel, Cmd.none
 
     | _ ->
@@ -96,14 +104,14 @@ let view (model : Model) (dispatch : Msg -> unit) =
                 [ Heading.h2 [ ]
                     [ str "LCS Playoff Contention" ] ] ]
 
-          viewLink Page.HeadToHead "Head to Heads"
+          viewLink (Page.HeadToHead "TL") "TL Head to Heads"
 
           Section.section [ ] [
             match model.PageModel with
             | HomePageModel ->
                 yield Home.view { Records = model.TeamRecords; PlayoffStatuses = model.PlayoffStatuses }
             | HeadToHeadPageModel ->
-                yield div [ ] [ str "TEST" ]
+                yield HeadToHead.view { Results = model.HeadToHeadResults }
           ]
 
           Footer.footer [ ]

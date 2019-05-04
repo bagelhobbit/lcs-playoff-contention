@@ -6,10 +6,10 @@
   <ItemGroup>
     <Compile Include="../Shared/Schedule.fs" />
     <Compile Include="../Shared/TeamRecord.fs" />
+    <Compile Include="../Shared/HeadToHead.fs" />
     <Compile Include="../Shared/Shared.fs" />
     <Compile Include="EliminatedTeams.fs" />
     <Compile Include="PlayoffTeams.fs" />
-    <Compile Include="HeadToHead.fs" />
     <Compile Include="Server.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
