@@ -4,7 +4,7 @@ module HeadToHead =
 
     open Schedule
 
-    type HeadToHeadResult = Loss | Tie | Win
+    type HeadToHeadResult = Win | Tie | Loss
     type HeadToHead = { team: string; result: HeadToHeadResult }
 
     let generateHeadToHeads team pastResults =

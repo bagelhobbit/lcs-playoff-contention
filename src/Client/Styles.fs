@@ -1,22 +1,13 @@
 module Client.Styles
 
-open Elmish.Navigation
-
-open Fable.Core.JsInterop
 open Fable.React
 open Fable.React.Props
 
-open Client.Pages
-
-let goToUrl (e: Browser.Types.MouseEvent) =
-    e.preventDefault()
-    let href = !!e.target?href
-    Navigation.newUrl href |> List.map (fun f -> f ignore) |> ignore
-
-let viewLink page description =
-    a [ Href (Pages.toPath page)
-        OnClick goToUrl ]
-      [ str description]
+let buttonLink cssClass onClick elements =
+    a [ ClassName cssClass
+        OnClick (fun _ -> onClick())
+        OnTouchStart (fun _ -> onClick())
+        Style [ Cursor "pointer" ] ] elements
 
 let safeComponents =
     let components =

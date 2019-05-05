@@ -9,7 +9,6 @@ open Fable.React
 open Shared
 open Shared.TeamRecord
 open Shared.HeadToHead
-open Client.Pages
 open Client.Styles
 
 open Fulma
@@ -22,10 +21,13 @@ type Model = {
     TeamRecords: Option<TeamRecord list>
     PlayoffStatuses: Option<(string * PlayoffStatus) list>
     HeadToHeadResults: Option<HeadToHead list>
+    HeadToHeadTeam: string option
     PageModel: PageModel
 }
 
 type Msg =
+    | LoadTeamRecords
+    | LoadTeamHeadToHead of string
     | TeamRecordsLoaded of Result<TeamRecord list, exn>
     | PlayoffStatusesLoaded of Result<(string * PlayoffStatus) list, exn>
     | HeadToHeadResult of Result<HeadToHead list, exn>
@@ -45,38 +47,32 @@ let initialTeamRecord = Server.api.lcsTeamRecords
 let playoffStatuses = Server.api.lcsPlayoffStatuses
 let headToHeadResults = Server.api.teamHeadToHeadRecords
 
-let urlUpdate (result:Page option) (model:Model) =
-    match result with
-    | None ->
-        model, Navigation.modifyUrl (toPath Page.Home)
-    | Some Page.Home ->
-        { model with PageModel = HomePageModel }, Cmd.none
-    | Some (Page.HeadToHead team) ->
-        let nextModel = { model with PageModel = HeadToHeadPageModel }
-        let nextCmd =
-            Cmd.OfAsync.perform
-                headToHeadResults
-                team
-                (Ok >> HeadToHeadResult)
-        nextModel, nextCmd
-
 // Use the page parameter to make `toNavigatable` happys
 let init page : Model * Cmd<Msg> =
     let initialModel = 
         { TeamRecords = None
           PlayoffStatuses = None
           HeadToHeadResults = None
+          HeadToHeadTeam = None
           PageModel = HomePageModel }
-    let loadCountCmd =
+    let loadTeamRecordsCmd =
         Cmd.OfAsync.perform
             initialTeamRecord
             ()
             (Ok >> TeamRecordsLoaded)
-    initialModel, loadCountCmd
-
+    initialModel, loadTeamRecordsCmd
 
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
+    | _, LoadTeamRecords ->
+        let nextModel = { currentModel with PageModel = HomePageModel }
+        let nextCmd =
+            Cmd.OfAsync.perform
+                initialTeamRecord
+                ()
+                (Ok >> TeamRecordsLoaded)
+        nextModel, nextCmd
+
     | _, TeamRecordsLoaded (Ok initialTeamRecord) ->
         let nextModel = { currentModel with TeamRecords = Some initialTeamRecord }
         let nextCmd = 
@@ -89,6 +85,15 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     | { TeamRecords = Some _ }, PlayoffStatusesLoaded (Ok initialStatuses) ->
         let nextModel = { currentModel with PlayoffStatuses = Some initialStatuses }
         nextModel, Cmd.none
+        
+    | _, LoadTeamHeadToHead team ->
+        let nextModel = { currentModel with PageModel = HeadToHeadPageModel; HeadToHeadTeam = Some team }
+        let nextCmd =
+            Cmd.OfAsync.perform
+                headToHeadResults
+                team
+                (Ok >> HeadToHeadResult)
+        nextModel, nextCmd
 
     | { PageModel = HeadToHeadPageModel }, HeadToHeadResult (Ok results) ->
         let nextModel = { currentModel with HeadToHeadResults = Some results}
@@ -104,15 +109,19 @@ let view (model : Model) (dispatch : Msg -> unit) =
                 [ Heading.h2 [ ]
                     [ str "LCS Playoff Contention" ] ] ]
 
-          viewLink (Page.HeadToHead "TL") "TL Head to Heads"
-
           Section.section [ ] [
             match model.PageModel with
             | HomePageModel ->
                 yield Home.view { Records = model.TeamRecords; PlayoffStatuses = model.PlayoffStatuses }
             | HeadToHeadPageModel ->
-                yield HeadToHead.view { Results = model.HeadToHeadResults }
+                let teamName =
+                    match model.HeadToHeadTeam with
+                    | Some s -> s
+                    | None -> ""
+                yield TeamHeadToHead.view { Results = model.HeadToHeadResults; Team = teamName; HomeLink = (fun _ -> dispatch LoadTeamRecords) }
           ]
+
+          buttonLink "" (fun _ -> dispatch (LoadTeamHeadToHead "TL")) [ str "TL Head to Heads" ]
 
           Footer.footer [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
@@ -123,7 +132,6 @@ open Elmish.Debug
 #endif
 
 Program.mkProgram init update view
-|> Program.toNavigable Pages.urlParser urlUpdate
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
