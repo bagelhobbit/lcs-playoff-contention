@@ -3,6 +3,8 @@ module Client.Home
 open Shared
 open Shared.TeamRecord
 
+open Client.Styles
+
 open Fable.React
 open Fable.React.Props
 open Fulma
@@ -11,10 +13,11 @@ open Fulma
 type Model = {
     Records: TeamRecord list option
     PlayoffStatuses: (string * PlayoffStatus) list option
+    HeadToHeadLink: string -> unit
 }
 
 
-let private createTile playoffStatuses teamRecord =
+let private createTile playoffStatuses headToHeadLink teamRecord =
     let getStatusModifier team =
         match playoffStatuses with
         | Some statuses ->
@@ -50,8 +53,9 @@ let private createTile playoffStatuses teamRecord =
 
     let teamTile =
         Tile.child [ ] 
-            [ Heading.h4 [ ] [ str teamRecord.team ]
-              Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ] ]
+            [ buttonLink "" (fun _ -> headToHeadLink teamRecord.team)
+                [ Heading.h4 [ ] [ str teamRecord.team ]
+                  Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ] ] ]
 
     Tile.parent [ (getStatusModifier teamRecord.team); Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] (teamTile::tiles)
 
@@ -79,7 +83,7 @@ let view model =
         match model.Records with
         | Some teamRecords ->
                 teamRecords
-                |> List.map (createTile model.PlayoffStatuses)
+                |> List.map (createTile model.PlayoffStatuses model.HeadToHeadLink)
         | None _ ->
             []
     div [ ]

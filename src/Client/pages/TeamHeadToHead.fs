@@ -44,7 +44,7 @@ let private breadcrumbs homeLink =
     Breadcrumb.breadcrumb [ Breadcrumb.Size IsMedium ]
         [ Breadcrumb.item [ ]
             [ buttonLink "" homeLink [ str "Home"] ]
-          Breadcrumb.item [ ]
+          Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
             [ a [ ] [ str "Head to Head" ] ]
           Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
             [ a [ ] [ str "Team Liquid" ] ] ]

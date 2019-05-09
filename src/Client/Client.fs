@@ -9,6 +9,7 @@ open Fable.React
 open Shared
 open Shared.TeamRecord
 open Shared.HeadToHead
+
 open Client.Styles
 
 open Fulma
@@ -47,8 +48,7 @@ let initialTeamRecord = Server.api.lcsTeamRecords
 let playoffStatuses = Server.api.lcsPlayoffStatuses
 let headToHeadResults = Server.api.teamHeadToHeadRecords
 
-// Use the page parameter to make `toNavigatable` happys
-let init page : Model * Cmd<Msg> =
+let init () : Model * Cmd<Msg> =
     let initialModel = 
         { TeamRecords = None
           PlayoffStatuses = None
@@ -112,16 +112,18 @@ let view (model : Model) (dispatch : Msg -> unit) =
           Section.section [ ] [
             match model.PageModel with
             | HomePageModel ->
-                yield Home.view { Records = model.TeamRecords; PlayoffStatuses = model.PlayoffStatuses }
+                yield Home.view { Records = model.TeamRecords
+                                  PlayoffStatuses = model.PlayoffStatuses
+                                  HeadToHeadLink = (fun s -> dispatch (LoadTeamHeadToHead s) ) }
             | HeadToHeadPageModel ->
                 let teamName =
                     match model.HeadToHeadTeam with
                     | Some s -> s
                     | None -> ""
-                yield TeamHeadToHead.view { Results = model.HeadToHeadResults; Team = teamName; HomeLink = (fun _ -> dispatch LoadTeamRecords) }
+                yield TeamHeadToHead.view { Results = model.HeadToHeadResults
+                                            Team = teamName
+                                            HomeLink = (fun _ -> dispatch LoadTeamRecords) }
           ]
-
-          buttonLink "" (fun _ -> dispatch (LoadTeamHeadToHead "TL")) [ str "TL Head to Heads" ]
 
           Footer.footer [ ]
                 [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
