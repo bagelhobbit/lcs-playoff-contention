@@ -106,7 +106,7 @@ let view (model : Model) (dispatch : Msg -> unit) =
     div [ ]
         [ Navbar.navbar [ Navbar.Color IsPrimary ]
             [ Navbar.Item.div [ ]
-                [ Heading.h2 [ ]
+                [ Heading.h2 [ Heading.Modifiers [ Modifier.TextColor Color.IsWhite ] ]
                     [ str "LCS Playoff Contention" ] ] ]
 
           Section.section [ ] [
