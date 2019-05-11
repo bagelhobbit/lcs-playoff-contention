@@ -1,13 +1,13 @@
 module Client.Home
 
+open Fable.React
+open Fable.React.Props
+open Fulma
+
 open Shared
 open Shared.TeamRecord
 
 open Client.Styles
-
-open Fable.React
-open Fable.React.Props
-open Fulma
 
 
 type Model = {

@@ -40,14 +40,14 @@ let private sectionTitle =
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
             [ Heading.h2 [ ] [ str "LCS 2019 Spring Split Head to Head Matchups" ] ] ]
 
-let private breadcrumbs homeLink =
+let private breadcrumbs team homeLink =
     Breadcrumb.breadcrumb [ Breadcrumb.Size IsMedium ]
         [ Breadcrumb.item [ ]
             [ buttonLink "" homeLink [ str "Home"] ]
           Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
             [ a [ ] [ str "Head to Head" ] ]
           Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
-            [ a [ ] [ str "Team Liquid" ] ] ]
+            [ a [ ] [ str team ] ] ]
 
 let view model =
     let results =
@@ -60,7 +60,7 @@ let view model =
         | None ->
             [ ]
     div [ ]
-        [ breadcrumbs model.HomeLink
+        [ breadcrumbs model.Team model.HomeLink
           sectionTitle
           (teamName model.Team)
           Tile.parent [ Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] results ]
