@@ -4,10 +4,12 @@ open System.Threading.Tasks
 open FSharp.Control.Tasks.V2
 open Saturn
 
-open Shared
+open Shared.Team
 open Shared.Schedule
-open HeadToHead
+open Shared.HeadToHead
 open Shared.TeamRecord
+open Shared
+
 open EliminatedTeams
 open PlayoffTeams
 
@@ -20,17 +22,30 @@ let publicPath = Path.GetFullPath "../Client/public"
 
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
+let private createTeam = function
+        | "100" -> Thieves
+        | "C9" -> C9
+        | "CG" -> CG
+        | "CLG" -> CLG
+        | "FOX" -> FOX
+        | "FQ" -> FQ
+        | "GGS" -> GGS
+        | "OPT" -> OPT
+        | "TL" -> TL
+        | "TSM" -> TSM
+        | _ -> Team.Unknown
+
 let getLcsResults = 
     let resultsFile = File.ReadAllText @"lcs_results.json"
-    ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> { winner=game.Winner; loser=game.Loser })
+    ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> { winner = createTeam game.Winner; loser = createTeam game.Loser })
 
 let getRemainingLcsSchedule = 
     let scheduleFile = File.ReadAllText @"lcs_remaining_schedule.json"
-    ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> { team1=game.Team1; team2=game.Team2 })
+    ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> { team1 = createTeam game.Team1; team2 = createTeam game.Team2 })
 
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
-        let lcsTeams = ["100"; "C9"; "CG"; "CLG"; "FOX"; "FQ"; "GGS"; "OPT"; "TL"; "TSM"]
+        let lcsTeams = [C9; CG; CLG; FOX; FQ; GGS; OPT; Thieves; TL; TSM]
 
         let lcsResults = getLcsResults
 
@@ -56,7 +71,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
         return currentRecords 
     }
 
-let getLcsPlayoffStatuses teamRecords : Task<(string * PlayoffStatus) list> =
+let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
     task {
         let eliminatedTeams = 
             findEliminatedTeams teamRecords getRemainingLcsSchedule 

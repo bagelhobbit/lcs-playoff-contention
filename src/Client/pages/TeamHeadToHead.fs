@@ -1,17 +1,18 @@
 module Client.TeamHeadToHead
 
-open Shared.HeadToHead
-
 open Fable.React
 open Fable.React.Props
 open Fulma
+
+open Shared.Team
+open Shared.HeadToHead
 
 open Client.Styles
 
 
 type Model = {
     Results: HeadToHead list option
-    Team: string
+    Team: Team
     HomeLink: unit -> unit
 }
 
@@ -27,13 +28,13 @@ let private createTeamTile result =
             Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsDanger) ] ] [ str "Lost" ]
 
     Tile.child [ ]
-        [ Heading.h4 [ ] [ str result.team ]
+        [ Heading.h4 [ ] [ str (toAbbr result.team) ]
           (generateResultString result.result) ]
 
 let private teamName name =
     Container.container [ ]
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-            [ Heading.h2 [ ] [ str (name + " vs.") ] ] ]
+            [ Heading.h2 [ ] [ str ( (toString name) + " vs.") ] ] ]
 
 let private sectionTitle =
     Container.container [ ]
@@ -47,7 +48,7 @@ let private breadcrumbs team homeLink =
           Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
             [ a [ ] [ str "Head to Head" ] ]
           Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
-            [ a [ ] [ str team ] ] ]
+            [ a [ ] [ str (toString team) ] ] ]
 
 let view model =
     let results =

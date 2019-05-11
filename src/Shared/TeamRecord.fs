@@ -2,12 +2,13 @@ namespace Shared
 
 module TeamRecord = 
 
+    open Team
     open Schedule
 
     type WinLoss = { wins: int; losses: int }
-    type MatchResult = { opponent: string; won: bool }
+    type MatchResult = { opponent: Team; won: bool }
     type TeamRecord = 
-        { team: string
+        { team: Team
           winLoss: WinLoss
           results: MatchResult list
         }

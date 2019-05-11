@@ -7,6 +7,7 @@ open Elmish.Navigation
 open Fable.React
 
 open Shared
+open Shared.Team
 open Shared.TeamRecord
 open Shared.HeadToHead
 
@@ -20,17 +21,17 @@ type PageModel =
 
 type Model = { 
     TeamRecords: Option<TeamRecord list>
-    PlayoffStatuses: Option<(string * PlayoffStatus) list>
+    PlayoffStatuses: Option<(Team * PlayoffStatus) list>
     HeadToHeadResults: Option<HeadToHead list>
-    HeadToHeadTeam: string option
+    HeadToHeadTeam: Team option
     PageModel: PageModel
 }
 
 type Msg =
     | LoadTeamRecords
-    | LoadTeamHeadToHead of string
+    | LoadTeamHeadToHead of Team
     | TeamRecordsLoaded of Result<TeamRecord list, exn>
-    | PlayoffStatusesLoaded of Result<(string * PlayoffStatus) list, exn>
+    | PlayoffStatusesLoaded of Result<(Team * PlayoffStatus) list, exn>
     | HeadToHeadResult of Result<HeadToHead list, exn>
 
 module Server =
@@ -119,7 +120,7 @@ let view (model : Model) (dispatch : Msg -> unit) =
                 let teamName =
                     match model.HeadToHeadTeam with
                     | Some s -> s
-                    | None -> ""
+                    | None -> Team.Unknown
                 yield TeamHeadToHead.view { Results = model.HeadToHeadResults
                                             Team = teamName
                                             HomeLink = (fun _ -> dispatch LoadTeamRecords) }

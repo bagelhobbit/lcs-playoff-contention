@@ -2,16 +2,17 @@ namespace Shared
 
 module HeadToHead =
 
+    open Team
     open Schedule
 
     type HeadToHeadResult = Win | Tie | Loss
-    type HeadToHead = { team: string; result: HeadToHeadResult }
+    type HeadToHead = { team: Team; result: HeadToHeadResult }
 
     let generateHeadToHeads team pastResults =
         let createHeadToHeadResult result =
             if(result.winner = team)
-            then { team=result.loser; result=Win }
-            else { team=result.winner; result=Loss }
+            then { team = result.loser; result = Win }
+            else { team = result.winner; result = Loss }
 
         let combine (results: HeadToHead list) (headToHead:HeadToHead) =
             match results with
