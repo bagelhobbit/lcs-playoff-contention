@@ -1,0 +1,58 @@
+$color-bye: #23d160
+$color-clinched: #3273DC
+$color-eliminated: #ff3860
+
+%legend::before
+    content: ""
+    display: inline-block
+    height: 16px
+    margin-left: 8px
+    margin-right: 4px
+    width: 16px
+
+%team
+    border-radius: 4px
+
+%team:not(:last-child) 
+    margin-bottom: 1.5rem
+
+%team:first-child 
+    margin-top: 1.5rem
+
+%team-border
+    border-left-style: solid
+    border-left-width: thick
+
+.team
+    @extend %team
+
+.team-bye
+    @extend %team
+    @extend %team-border
+    border-left-color: $color-bye
+
+.team-clinched
+    @extend %team
+    @extend %team-border
+    border-left-color: $color-clinched
+
+.team-eliminated
+    @extend %team
+    @extend %team-border
+    border-left-color: $color-eliminated
+
+.legend-bye, .legend-clinched, .legend-eliminated
+    display: inline-block
+    line-height: 1.5
+
+.legend-bye::before
+    @extend %legend
+    background-color: $color-bye
+
+.legend-clinched::before
+    @extend %legend
+    background-color: $color-clinched
+
+.legend-eliminated::before
+    @extend %legend
+    background-color: $color-eliminated

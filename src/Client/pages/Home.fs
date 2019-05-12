@@ -27,13 +27,13 @@ let private createTile playoffStatuses headToHeadLink teamRecord =
                 |> List.find (fun (t, _) -> t = team)
             match status with
             | Eliminated ->
-                Tile.CustomClass ("eliminated team")
+                Tile.CustomClass ("team-eliminated")
             | Unknown ->
                 Tile.CustomClass ("team")
             | Clinched ->
-                Tile.CustomClass ("clinched team")
+                Tile.CustomClass ("team-clinched")
             | Bye ->
-                Tile.CustomClass ("bye team")
+                Tile.CustomClass ("team-bye")
         | None ->
             Tile.CustomClass ("team")
 
@@ -64,15 +64,9 @@ let private playoffLegend =
     Container.container [ ]
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
             [ Heading.h6 [ ] 
-                [ div [ ClassName "legend" ]
-                    [ span [ ClassName "has-background-success"] [ ]
-                      str "Clinch Bye" ]
-                  div [ ClassName "legend" ]
-                    [ span [ ClassName "has-background-link" ] [ ]
-                      str "Clinch Playoffs" ]
-                  div [ ClassName "legend" ] 
-                    [ span [ ClassName "has-background-danger" ] [ ]
-                      str "Eliminated" ] ] ] ]
+                [ span [ ClassName "legend-bye"] [ str "Clinch Bye" ]
+                  span [ ClassName "legend-clinched" ] [ str "Clinch Playoffs" ]
+                  span [ ClassName "legend-eliminated" ] [ str "Eliminated" ] ] ] ]
 
 let private sectionTitle =
     Container.container [ ]
