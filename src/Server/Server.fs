@@ -15,6 +15,7 @@ open PlayoffTeams
 
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
+open System
 
 let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" -> None | x -> Some x
 
@@ -23,7 +24,7 @@ let publicPath = Path.GetFullPath "../Client/public"
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
 let getApiSchedule =
-    LeagueEventsJson.Parse(apiSite)
+    LeagueEventsJson.Parse(apiSite).Data.Schedule
 
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
@@ -33,7 +34,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
         // Just let type provider provide types
         // But I wanted to delcare types for debugging/conversion
         let lcsResults = 
-            getApiSchedule.Data.Schedule.Events
+            getApiSchedule.Events
             |> Seq.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State
@@ -63,9 +64,9 @@ let getCurrentRecords() : Task<TeamRecord list> =
         let descendingComparer team1 team2 =
             // 1 - x > y; 0 - x = y; -1 - x < y
             // Reverse the comparer so teams with a better head to head record are at the top
-            if team1.winLoss = team2.winLoss
+            if team1.WinLoss = team2.WinLoss
             then 
-                let headToHead = generateHeadToHeadResult team1.team team2.team lcsResults
+                let headToHead = generateHeadToHeadResult team1.Team team2.Team lcsResults
 
                 match headToHead with
                 | Win -> -1
@@ -76,7 +77,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
         let currentRecords =
             lcsTeams
             |> List.map (generateTeamRecord lcsResults)
-            |> List.sortByDescending (fun record -> record.winLoss.Wins)
+            |> List.sortByDescending (fun record -> record.WinLoss.Wins)
             |> List.sortWith descendingComparer
 
         return currentRecords 
@@ -84,28 +85,57 @@ let getCurrentRecords() : Task<TeamRecord list> =
 
 let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
     task {
+        let remainingSchedule =
+            getApiSchedule.Events
+            |> Seq.filter (fun event -> event.StartTime >= DateTimeOffset.Now && event.BlockName.Contains "Week")
+            |> Seq.map (fun event -> 
+                { StartTime = event.StartTime
+                  State = event.State
+                  Type = event.Type
+                  BlockName = event.BlockName
+                  League =
+                    { Name = event.League.Name
+                      Slug = event.League.Slug  }
+                  Match =
+                    { Id = event.Match.Id
+                      Teams = 
+                        event.Match.Teams
+                        |> Seq.map (fun team ->
+                            { Name = team.Name
+                              Code = team.Code
+                              Result = 
+                                { Outcome = team.Result.Outcome
+                                  GameWins = team.Result.GameWins }
+                              Record = 
+                                { Wins = team.Record.Wins
+                                  Losses = team.Record.Losses } } )
+                        |> List.ofSeq
+                      Strategy =
+                        { Type = event.Match.Strategy.Type
+                          Count = event.Match.Strategy.Count } } } )
+
         let eliminatedTeams = 
-            findEliminatedTeams teamRecords getRemainingLcsSchedule 
-            |> List.map (fun team -> team.team)
+            findEliminatedTeams teamRecords remainingSchedule
+            |> List.map (fun team -> team.Team)
 
         let playoffTeams =
             findPlayoffTeams teamRecords
-            |> List.map (fun team -> team.team)
+            |> List.map (fun team -> team.Team)
 
         let playoffByes =
             findPlayoffByes teamRecords
-            |> List.map (fun team -> team.team)
+            |> List.map (fun team -> team.Team)
 
         let assignPlayoffStatus team =
             let containsTeam =
                 [ eliminatedTeams; playoffTeams; playoffByes ]
-                |> List.map (List.contains team.team)
+                |> List.map (List.contains team.Team)
 
             match containsTeam with
-            | _::_::[x] when x -> (team.team, Bye)
-            | _::x::_ when x -> (team.team, Clinched)
-            | x::_ when x -> (team.team, Eliminated)
-            | _ -> (team.team, Unknown)
+            | _::_::[x] when x -> (team.Team, Bye)
+            | _::x::_ when x -> (team.Team, Clinched)
+            | x::_ when x -> (team.Team, Eliminated)
+            | _ -> (team.Team, Unknown)
 
         return teamRecords
         |> List.map assignPlayoffStatus

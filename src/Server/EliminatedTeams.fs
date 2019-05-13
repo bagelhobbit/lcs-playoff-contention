@@ -2,19 +2,28 @@ module EliminatedTeams
 
 open Shared
 open Shared.Schedule
+open Shared.Team
 open Shared.TeamRecord
 
 let findEliminatedTeams teamRecords futureSchedule =
     let remainingGames =
-        let currentGames = List.head teamRecords |> (fun x -> x.winLoss.wins + x.winLoss.losses)
+        let currentGames = List.head teamRecords |> (fun x -> x.WinLoss.Wins + x.WinLoss.Losses)
         Constants.totalLcsGames - currentGames
 
     let minimunRequiredWins =
         let minWins =
             teamRecords
-            |> List.sortByDescending (fun team -> team.winLoss.wins)
+            |> List.sortByDescending (fun team -> team.WinLoss.Wins)
             |> List.item 5
-            |> (fun team -> team.winLoss.wins)
+            |> (fun team -> team.WinLoss.Wins)
+
+        let filterFutureSchedule team1 team2 event =
+            let teamCode1 = toCode team1.Team
+            let teamCode2 = toCode team2.Team
+
+            event.Match.Teams
+            |> List.map (fun team -> team.Code)
+            |> fun teams -> teams = [ teamCode1; teamCode2 ] || teams = [ teamCode2; teamCode1 ]
 
         let unpairwise x =
             match x with
@@ -23,11 +32,11 @@ let findEliminatedTeams teamRecords futureSchedule =
 
         let tiedPotentialContenders =
             teamRecords
-            |> List.filter (fun team -> team.winLoss.wins = minWins)
+            |> List.filter (fun team -> team.WinLoss.Wins = minWins)
             |> List.pairwise
-            |> List.filter (fun (team1, team2) -> Seq.contains { team1=team1.team; team2=team2.team } futureSchedule)
+            |> List.filter (fun (team1, team2) -> Seq.exists (filterFutureSchedule team1 team2) futureSchedule)
             |> unpairwise
-            |> List.map (fun team -> team.team)
+            |> List.map (fun team -> team.Team)
 
         match tiedPotentialContenders with
         | [] -> minWins
@@ -35,4 +44,4 @@ let findEliminatedTeams teamRecords futureSchedule =
         | _ -> minWins + 1
 
     teamRecords
-    |> List.filter (fun team -> team.winLoss.wins + remainingGames < minimunRequiredWins)
+    |> List.filter (fun team -> team.WinLoss.Wins + remainingGames < minimunRequiredWins)

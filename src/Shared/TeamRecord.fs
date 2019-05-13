@@ -8,9 +8,9 @@ module TeamRecord =
     type WinLoss = { Wins: int; Losses: int }
     type MatchResult = { Opponent: Team; Won: bool }
     type TeamRecord = 
-        { team: Team
-          winLoss: WinLoss
-          results: MatchResult list
+        { Team: Team
+          WinLoss: WinLoss
+          Results: MatchResult list
         }
 
     let private createTeam = function
@@ -57,7 +57,7 @@ module TeamRecord =
     let generateTeamRecord events team =
         let teamCode = toCode team
 
-        { team = team
-          winLoss = generateWinLoss teamCode events
-          results = generateMatchResults teamCode events
+        { Team = team
+          WinLoss = generateWinLoss teamCode events
+          Results = generateMatchResults teamCode events
         }
