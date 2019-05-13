@@ -27,7 +27,7 @@ module Team =
         | TSM -> "TSM"
         | Unknown -> "Unknown Team"
 
-    let toAbbr = function
+    let toCode = function
         | C9 -> "C9"
         | CG -> "CG"
         | CLG -> "CLG"

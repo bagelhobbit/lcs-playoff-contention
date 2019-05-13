@@ -2,42 +2,62 @@ namespace Shared
 
 module TeamRecord = 
 
-    open Team
     open Schedule
+    open Team
 
-    type WinLoss = { wins: int; losses: int }
-    type MatchResult = { opponent: Team; won: bool }
+    type WinLoss = { Wins: int; Losses: int }
+    type MatchResult = { Opponent: Team; Won: bool }
     type TeamRecord = 
         { team: Team
           winLoss: WinLoss
           results: MatchResult list
         }
 
-    let private isTeamInGame team result =
-        result.winner = team || result.loser = team
+    let private createTeam = function
+        | "100" -> Thieves
+        | "C9" -> C9
+        | "CG" -> CG
+        | "CLG" -> CLG
+        | "FOX" -> FOX
+        | "FQ" -> FQ
+        | "GGS" -> GGS
+        | "OPT" -> OPT
+        | "TL" -> TL
+        | "TSM" -> TSM
+        | _ -> Team.Unknown
 
-    let private createMatchResult team result =
-        if result.winner = team 
-        then { opponent=result.loser; won=true }
-        else { opponent=result.winner; won=false }
+    let private isTeamInGame teamCode event =
+        event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) 
 
-    let generateWinLoss team pastResults =
-        let (wins, losses) =
-            pastResults
-            |> Seq.filter (isTeamInGame team)
-            |> Seq.toList
-            |> List.partition (fun result -> result.winner = team)
+    let private createMatchResult teamCode event =
+        let opposingTeam =
+            event.Match.Teams
+            |> List.find (fun team -> team.Code <> teamCode)
 
-        { wins = wins.Length; losses = losses.Length }
+        let outcome =
+            match opposingTeam.Result.Outcome with
+            | "win" -> false
+            | "loss" -> true
+            | _ -> true
+        
+        { Opponent = createTeam opposingTeam.Code; Won = outcome }
 
-    let generateMatchResults team pastResults =
-        pastResults
-        |> Seq.filter (isTeamInGame team)
-        |> Seq.map (createMatchResult team)
+    let private generateWinLoss teamCode events =
+        events
+        |> Seq.find (fun event -> event.Match.Teams |> Seq.exists (fun team -> team.Code = teamCode ) )
+        |> fun event -> event.Match.Teams |> List.find (fun team -> team.Code = teamCode)
+        |> fun team -> { Wins = team.Record.Wins ; Losses = team.Record.Losses }
+
+    let private generateMatchResults teamCode events =
+        events
+        |> Seq.filter (isTeamInGame teamCode)
+        |> Seq.map (createMatchResult teamCode)
         |> Seq.toList
 
-    let generateTeamRecord results team =
+    let generateTeamRecord events team =
+        let teamCode = toCode team
+
         { team = team
-          winLoss = generateWinLoss team results
-          results = generateMatchResults team results
+          winLoss = generateWinLoss teamCode events
+          results = generateMatchResults teamCode events
         }

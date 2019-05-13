@@ -4,8 +4,8 @@ open System.Threading.Tasks
 open FSharp.Control.Tasks.V2
 open Saturn
 
-open Shared.Team
 open Shared.Schedule
+open Shared.Team
 open Shared.HeadToHead
 open Shared.TeamRecord
 open Shared
@@ -22,32 +22,43 @@ let publicPath = Path.GetFullPath "../Client/public"
 
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
-let private createTeam = function
-        | "100" -> Thieves
-        | "C9" -> C9
-        | "CG" -> CG
-        | "CLG" -> CLG
-        | "FOX" -> FOX
-        | "FQ" -> FQ
-        | "GGS" -> GGS
-        | "OPT" -> OPT
-        | "TL" -> TL
-        | "TSM" -> TSM
-        | _ -> Team.Unknown
-
-let getLcsResults = 
-    let resultsFile = File.ReadAllText @"lcs_results.json"
-    ScheduleResultJson.Parse(resultsFile) |> Seq.map (fun game -> { winner = createTeam game.Winner; loser = createTeam game.Loser })
-
-let getRemainingLcsSchedule = 
-    let scheduleFile = File.ReadAllText @"lcs_remaining_schedule.json"
-    ScheduleJson.Parse(scheduleFile) |> Seq.map (fun game -> { team1 = createTeam game.Team1; team2 = createTeam game.Team2 })
+let getApiSchedule =
+    LeagueEventsJson.Parse(apiSite)
 
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
         let lcsTeams = [C9; CG; CLG; FOX; FQ; GGS; OPT; Thieves; TL; TSM]
 
-        let lcsResults = getLcsResults
+        // This should probably not be converted
+        // Just let type provider provide types
+        // But I wanted to delcare types for debugging/conversion
+        let lcsResults = 
+            getApiSchedule.Data.Schedule.Events
+            |> Seq.map (fun event -> 
+                { StartTime = event.StartTime
+                  State = event.State
+                  Type = event.Type
+                  BlockName = event.BlockName
+                  League =
+                    { Name = event.League.Name
+                      Slug = event.League.Slug  }
+                  Match =
+                    { Id = event.Match.Id
+                      Teams = 
+                        event.Match.Teams
+                        |> Seq.map (fun team ->
+                            { Name = team.Name
+                              Code = team.Code
+                              Result = 
+                                { Outcome = team.Result.Outcome
+                                  GameWins = team.Result.GameWins }
+                              Record = 
+                                { Wins = team.Record.Wins
+                                  Losses = team.Record.Losses } } )
+                        |> List.ofSeq
+                      Strategy =
+                        { Type = event.Match.Strategy.Type
+                          Count = event.Match.Strategy.Count } } } )
 
         let descendingComparer team1 team2 =
             // 1 - x > y; 0 - x = y; -1 - x < y
@@ -62,10 +73,10 @@ let getCurrentRecords() : Task<TeamRecord list> =
                 | Loss -> 1
             else 0
 
-        let currentRecords = 
+        let currentRecords =
             lcsTeams
             |> List.map (generateTeamRecord lcsResults)
-            |> List.sortByDescending (fun record -> record.winLoss.wins)
+            |> List.sortByDescending (fun record -> record.winLoss.Wins)
             |> List.sortWith descendingComparer
 
         return currentRecords 
