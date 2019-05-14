@@ -1,6 +1,8 @@
 open System.IO
 open System.Threading.Tasks
 
+open FSharp.Data
+
 open FSharp.Control.Tasks.V2
 open Saturn
 
@@ -24,11 +26,22 @@ let publicPath = Path.GetFullPath "../Client/public"
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
 let getApiSchedule =
+    let naLeagueId = "98767991299243165"
+    let apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
+
+    let apiSite =
+        // This should probably be rate limited somewhat based on last updated time
+        // This should also make sure the whole season is present
+        // Current dataset is missing week 1 and ~half of week 2
+        Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
+            query = [ "hl", "en-US"; "leagueId", naLeagueId],
+            headers = [ "x-api-key", apiKey] )
+
     LeagueEventsJson.Parse(apiSite).Data.Schedule
 
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
-        let lcsTeams = [C9; CG; CLG; FOX; FQ; GGS; OPT; Thieves; TL; TSM]
+        let lcsTeams = [C9; CG; CLG; FOX; FLY; GGS; OPT; Thieves; TL; TSM]
 
         // This should probably not be converted
         // Just let type provider provide types

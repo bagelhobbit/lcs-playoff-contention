@@ -6,7 +6,7 @@ module Team =
         | CG
         | CLG
         | FOX
-        | FQ
+        | FLY
         | GGS
         | OPT
         | Thieves
@@ -19,7 +19,7 @@ module Team =
         | CG -> "Clutch Gaming"
         | CLG -> "Counter Logic Gaming"
         | FOX -> "Echo Fox"
-        | FQ -> "FlyQuest"
+        | FLY -> "FlyQuest"
         | GGS -> "Golden Guardians"
         | OPT -> "OpTic Gaming"
         | Thieves -> "100 Thieves"
@@ -32,7 +32,7 @@ module Team =
         | CG -> "CG"
         | CLG -> "CLG"
         | FOX -> "FOX"
-        | FQ -> "FQ"
+        | FLY -> "FLY"
         | GGS -> "GGS"
         | OPT -> "OPT"
         | Thieves -> "100"

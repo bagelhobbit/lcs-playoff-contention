@@ -39,26 +39,26 @@ let private createTile playoffStatuses headToHeadLink teamRecord =
 
     let createTiles result =
         let createOpponentTile =
-            Heading.h6 [ ] [ str (Team.toAbbr result.opponent) ]
+            Heading.h6 [ ] [ str (Team.toCode result.Opponent) ]
 
         let createWinLossTile =
-            if result.won
+            if result.Won
             then Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsSuccess) ] ] [ str "Win" ]
             else Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsDanger) ] ] [ str "Loss" ]
 
         Tile.child [ ] [ createOpponentTile; createWinLossTile ]
 
     let tiles =
-        teamRecord.results
+        teamRecord.Results
         |> List.map createTiles
 
     let teamTile =
         Tile.child [ ] 
-            [ buttonLink "" (fun _ -> headToHeadLink teamRecord.team)
-                [ Heading.h4 [ ] [ str (Team.toAbbr teamRecord.team) ]
-                  Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.winLoss.wins teamRecord.winLoss.losses) ] ] ]
+            [ buttonLink "" (fun _ -> headToHeadLink teamRecord.Team)
+                [ Heading.h4 [ ] [ str (Team.toCode teamRecord.Team) ]
+                  Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.WinLoss.Wins teamRecord.WinLoss.Losses) ] ] ]
 
-    Tile.parent [ (getStatusModifier teamRecord.team); Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] (teamTile::tiles)
+    Tile.parent [ (getStatusModifier teamRecord.Team); Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] (teamTile::tiles)
 
 let private playoffLegend =
     Container.container [ ]

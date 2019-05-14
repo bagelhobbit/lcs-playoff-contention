@@ -16,8 +16,7 @@ type Model = {
     HomeLink: unit -> unit
 }
 
-
-let private createTeamTile result =
+let private createTeamTile (result: HeadToHead) =
     let generateResultString result =
         match result with
         | Win ->
@@ -28,20 +27,20 @@ let private createTeamTile result =
             Heading.h6 [ Heading.Modifiers [ Modifier.TextColor (Color.IsDanger) ] ] [ str "Lost" ]
 
     Tile.child [ ]
-        [ Heading.h4 [ ] [ str (toAbbr result.team) ]
-          (generateResultString result.result) ]
+        [ Heading.h4 [ ] [ str (result.Team.Code) ]
+          (generateResultString result.Result) ]
 
-let private teamName name =
+let private createTeamName team =
     Container.container [ ]
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-            [ Heading.h2 [ ] [ str ( (toString name) + " vs.") ] ] ]
+            [ Heading.h2 [ ] [ str ( (toString team) + " vs.") ] ] ]
 
-let private sectionTitle =
+let private createSectionTitle =
     Container.container [ ]
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
             [ Heading.h2 [ ] [ str "LCS 2019 Spring Split Head to Head Matchups" ] ] ]
 
-let private breadcrumbs team homeLink =
+let private createBreadcrumbs team homeLink =
     Breadcrumb.breadcrumb [ Breadcrumb.Size IsMedium ]
         [ Breadcrumb.item [ ]
             [ buttonLink "" homeLink [ str "Home"] ]
@@ -55,13 +54,14 @@ let view model =
         match model.Results with
         | Some results ->
             results
-            |> List.sortBy (fun r -> r.result)
+            |> List.sortBy (fun headToHead -> headToHead.Result)
             |> List.map createTeamTile
 
         | None ->
             [ ]
+
     div [ ]
-        [ breadcrumbs model.Team model.HomeLink
-          sectionTitle
-          (teamName model.Team)
+        [ createBreadcrumbs model.Team model.HomeLink
+          createSectionTitle
+          createTeamName model.Team
           Tile.parent [ Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] results ]

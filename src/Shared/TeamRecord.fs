@@ -19,7 +19,7 @@ module TeamRecord =
         | "CG" -> CG
         | "CLG" -> CLG
         | "FOX" -> FOX
-        | "FQ" -> FQ
+        | "FLY" -> FLY
         | "GGS" -> GGS
         | "OPT" -> OPT
         | "TL" -> TL

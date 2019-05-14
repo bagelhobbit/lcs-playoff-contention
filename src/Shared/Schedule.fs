@@ -43,11 +43,3 @@ module Schedule =
           Match: Match }
 
     type LeagueEventsJson = JsonProvider<"C:\Users\Evan\Documents\code\F#\PlayoffContentionWeb\src\server\eventBasic.json">
-
-    let private naLeagueId = "98767991299243165"
-    let private apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
-
-    let apiSite = 
-        Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
-            query = [ "hl", "en-US"; "leagueId", naLeagueId],
-            headers = [ "x-api-key", apiKey] )
