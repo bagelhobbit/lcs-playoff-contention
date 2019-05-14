@@ -6,43 +6,69 @@ module HeadToHead =
     open Schedule
 
     type HeadToHeadResult = Win | Tie | Loss
-    type HeadToHead = { team: Team; result: HeadToHeadResult }
+    type HeadToHead = { Team: Team; Result: HeadToHeadResult }
 
-    let generateHeadToHeads team pastResults =
-        let createHeadToHeadResult result =
-            if(result.winner = team)
-            then { team = result.loser; result = Win }
-            else { team = result.winner; result = Loss }
+    let generateHeadToHeads team pastEvents =
+        let teamCode = toCode team
 
-        let combine (results: HeadToHead list) (headToHead:HeadToHead) =
+        let createHeadToHead event =
+            let teamWon (team: Schedule.Team) =
+                match team.Result.Outcome with
+                | "win" -> true
+                | "loss" -> false
+                | _ -> false
+
+            let currentTeam, opposingTeam =
+                let teams = event.Match.Teams
+                teams |> List.partition (fun team -> team.Code = teamCode)
+
+            if (teamWon currentTeam.Head)
+            then { Team = opposingTeam.Head; Result = Win }
+            else { Team = currentTeam.Head; Result = Loss }
+
+
+        let combine results headToHead =
             match results with
             | [] -> [headToHead]
-            | x::xs when x.team = headToHead.team ->
-                match (x.result, headToHead.result) with
-                | (Win, Loss) ->  { team=x.team; result=Tie }::xs
-                | (Win, _) ->  { team=x.team; result=Win }::xs
-                | (Loss, Win) ->  { team=x.team; result=Tie }::xs
-                | (Loss, _) ->  { team=x.team; result=Loss }::xs
-                | (Tie, Win) ->  { team=x.team; result=Win }::xs
-                | (Tie, Loss) ->  { team=x.team; result=Loss }::xs
-                | (Tie, Tie) ->  { team=x.team; result=Tie }::xs
+            | x::xs when x.Team = headToHead.Team ->
+                match (x.Result, headToHead.Result) with
+                | (Win, Loss) ->  { Team=x.Team; Result=Tie }::xs
+                | (Win, _) ->  { Team=x.Team; Result=Win }::xs
+                | (Loss, Win) ->  { Team=x.Team; Result=Tie }::xs
+                | (Loss, _) ->  { Team=x.Team; Result=Loss }::xs
+                | (Tie, Win) ->  { Team=x.Team; Result=Win }::xs
+                | (Tie, Loss) ->  { Team=x.Team; Result=Loss }::xs
+                | (Tie, Tie) ->  { Team=x.Team; Result=Tie }::xs
             | xs -> headToHead::xs
 
-        pastResults
-        |> Seq.filter (fun result -> result.winner = team || result.loser = team)
-        |> Seq.map createHeadToHeadResult
-        |> Seq.sortBy (fun result -> result.team)
+        pastEvents
+        |> Seq.filter (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) )
+        |> Seq.map createHeadToHead
+        |> Seq.sortBy (fun result -> result.Team)
         |> Seq.fold combine []
 
-    let generateHeadToHeadResult team1 team2 pastResults =
-        let filterTeams result =
-            (result.winner = team1 && result.loser = team2)
-            || (result.winner = team2 && result.loser = team1)
+    let generateHeadToHeadResult team1 team2 pastEvents =
+        let teamCode1 = toCode team1
+        let teamCode2 = toCode team2
+
+        let teamWon (team: Schedule.Team) =
+            match team.Result.Outcome with
+            | "win" -> true
+            | "loss" -> false
+            | _ -> false
+
+        let filterHeadToHeads event =
+            event.Match.Teams 
+            |> List.forall (fun team -> team.Code = teamCode1 || team.Code = teamCode2) 
+
+        let filterWinningTeams event =
+            event.Match.Teams 
+            |> List.exists (fun team -> team.Code = teamCode1 && (teamWon team)) 
         
         let headToHeadWins =
-            pastResults
-            |> Seq.filter filterTeams
-            |> Seq.filter (fun result -> result.winner = team1)
+            pastEvents
+            |> Seq.filter filterHeadToHeads
+            |> Seq.filter filterWinningTeams
             |> Seq.length
            
         match headToHeadWins with

@@ -33,8 +33,11 @@ let getCurrentRecords() : Task<TeamRecord list> =
         // This should probably not be converted
         // Just let type provider provide types
         // But I wanted to delcare types for debugging/conversion
+
+        // Conversion should move to schedule file, which should be refactored as well
         let lcsResults = 
             getApiSchedule.Events
+            // filter to regular season, similar to get playoff statuses
             |> Seq.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State
@@ -143,7 +146,34 @@ let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
 
 let getHeadToHeads team : Task<HeadToHead list> =
     task {
-        let lcsResults = getLcsResults
+        let lcsResults = 
+            getApiSchedule.Events
+            // should filter here
+            |> Seq.map (fun event -> 
+                { StartTime = event.StartTime
+                  State = event.State
+                  Type = event.Type
+                  BlockName = event.BlockName
+                  League =
+                    { Name = event.League.Name
+                      Slug = event.League.Slug  }
+                  Match =
+                    { Id = event.Match.Id
+                      Teams = 
+                        event.Match.Teams
+                        |> Seq.map (fun team ->
+                            { Name = team.Name
+                              Code = team.Code
+                              Result = 
+                                { Outcome = team.Result.Outcome
+                                  GameWins = team.Result.GameWins }
+                              Record = 
+                                { Wins = team.Record.Wins
+                                  Losses = team.Record.Losses } } )
+                        |> List.ofSeq
+                      Strategy =
+                        { Type = event.Match.Strategy.Type
+                          Count = event.Match.Strategy.Count } } } )
 
         return generateHeadToHeads team lcsResults
     }
