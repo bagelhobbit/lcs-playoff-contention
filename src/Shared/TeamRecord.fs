@@ -10,8 +10,7 @@ module TeamRecord =
     type TeamRecord = 
         { Team: Team
           WinLoss: WinLoss
-          Results: MatchResult list
-        }
+          Results: MatchResult list }
 
     let private createTeam = function
         | "100" -> Thieves
@@ -44,20 +43,19 @@ module TeamRecord =
 
     let private generateWinLoss teamCode events =
         events
-        |> Seq.find (fun event -> event.Match.Teams |> Seq.exists (fun team -> team.Code = teamCode ) )
+        |> Array.find (fun event -> event.Match.Teams |> Seq.exists (fun team -> team.Code = teamCode ) )
         |> fun event -> event.Match.Teams |> List.find (fun team -> team.Code = teamCode)
         |> fun team -> { Wins = team.Record.Wins ; Losses = team.Record.Losses }
 
     let private generateMatchResults teamCode events =
         events
-        |> Seq.filter (isTeamInGame teamCode)
-        |> Seq.map (createMatchResult teamCode)
-        |> Seq.toList
+        |> Array.filter (isTeamInGame teamCode)
+        |> Array.map (createMatchResult teamCode)
+        |> Array.toList
 
     let generateTeamRecord events team =
         let teamCode = toCode team
 
         { Team = team
           WinLoss = generateWinLoss teamCode events
-          Results = generateMatchResults teamCode events
-        }
+          Results = generateMatchResults teamCode events }

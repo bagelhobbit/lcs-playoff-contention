@@ -31,13 +31,35 @@ let getApiSchedule =
 
     let apiSite =
         // This should probably be rate limited somewhat based on last updated time
-        // This should also make sure the whole season is present
-        // Current dataset is missing week 1 and ~half of week 2
         Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
             query = [ "hl", "en-US"; "leagueId", naLeagueId],
             headers = [ "x-api-key", apiKey] )
 
-    LeagueEventsJson.Parse(apiSite).Data.Schedule
+    let schedule = LeagueEventsJson.Parse(apiSite).Data.Schedule
+
+    let regularSeasonEvents =
+        schedule.Events
+        |> Array.filter (fun event -> event.BlockName.Contains "Week")
+
+    // Total matches: 9 weeks * 10 games/week = 90 games
+    if(regularSeasonEvents |> Array.length <> 90)
+    then
+        let oldEventsJson =
+            Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
+                query = [ "hl", "en-US"; "leagueId", naLeagueId; "pageToken", schedule.Pages.Older],
+                headers = [ "x-api-key", apiKey] )
+
+        // We should never need more than weeks 1 & 2
+        // since that's the most that is missing after the LCS finals
+        let oldEvents =
+            LeagueEventsJson.Parse(oldEventsJson).Data.Schedule.Events
+            |> Array.filter (fun event -> event.BlockName = "Week 1" || event.BlockName = "Week 2")
+
+        Array.append regularSeasonEvents oldEvents
+        |> Array.sortBy (fun event -> event.StartTime)
+    else
+        regularSeasonEvents
+        |> Array.sortBy (fun event -> event.StartTime)
 
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
@@ -49,9 +71,9 @@ let getCurrentRecords() : Task<TeamRecord list> =
 
         // Conversion should move to schedule file, which should be refactored as well
         let lcsResults = 
-            getApiSchedule.Events
-            // filter to regular season, similar to get playoff statuses
-            |> Seq.map (fun event -> 
+            getApiSchedule
+            |> Array.filter (fun event -> event.State = StateCompleted)
+            |> Array.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State
                   Type = event.Type
@@ -63,7 +85,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
                     { Id = event.Match.Id
                       Teams = 
                         event.Match.Teams
-                        |> Seq.map (fun team ->
+                        |> Array.map (fun team ->
                             { Name = team.Name
                               Code = team.Code
                               Result = 
@@ -72,7 +94,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
                               Record = 
                                 { Wins = team.Record.Wins
                                   Losses = team.Record.Losses } } )
-                        |> List.ofSeq
+                        |> List.ofArray
                       Strategy =
                         { Type = event.Match.Strategy.Type
                           Count = event.Match.Strategy.Count } } } )
@@ -102,9 +124,9 @@ let getCurrentRecords() : Task<TeamRecord list> =
 let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
     task {
         let remainingSchedule =
-            getApiSchedule.Events
-            |> Seq.filter (fun event -> event.StartTime >= DateTimeOffset.Now && event.BlockName.Contains "Week")
-            |> Seq.map (fun event -> 
+            getApiSchedule
+            |> Array.filter (fun event -> event.State = StateUnstarted)
+            |> Array.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State
                   Type = event.Type
@@ -116,7 +138,7 @@ let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
                     { Id = event.Match.Id
                       Teams = 
                         event.Match.Teams
-                        |> Seq.map (fun team ->
+                        |> Array.map (fun team ->
                             { Name = team.Name
                               Code = team.Code
                               Result = 
@@ -125,7 +147,7 @@ let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
                               Record = 
                                 { Wins = team.Record.Wins
                                   Losses = team.Record.Losses } } )
-                        |> List.ofSeq
+                        |> List.ofArray
                       Strategy =
                         { Type = event.Match.Strategy.Type
                           Count = event.Match.Strategy.Count } } } )
@@ -160,9 +182,9 @@ let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
 let getHeadToHeads team : Task<HeadToHead list> =
     task {
         let lcsResults = 
-            getApiSchedule.Events
-            // should filter here
-            |> Seq.map (fun event -> 
+            getApiSchedule
+            |> Array.filter (fun event -> event.State = StateCompleted)
+            |> Array.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State
                   Type = event.Type
@@ -174,7 +196,7 @@ let getHeadToHeads team : Task<HeadToHead list> =
                     { Id = event.Match.Id
                       Teams = 
                         event.Match.Teams
-                        |> Seq.map (fun team ->
+                        |> Array.map (fun team ->
                             { Name = team.Name
                               Code = team.Code
                               Result = 
@@ -183,7 +205,7 @@ let getHeadToHeads team : Task<HeadToHead list> =
                               Record = 
                                 { Wins = team.Record.Wins
                                   Losses = team.Record.Losses } } )
-                        |> List.ofSeq
+                        |> List.ofArray
                       Strategy =
                         { Type = event.Match.Strategy.Type
                           Count = event.Match.Strategy.Count } } } )

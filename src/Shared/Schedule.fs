@@ -43,3 +43,9 @@ module Schedule =
           Match: Match }
 
     type LeagueEventsJson = JsonProvider<"C:\Users\Evan\Documents\code\F#\PlayoffContentionWeb\src\server\eventBasic.json">
+
+    [<Literal>]
+    let StateCompleted = "completed"
+
+    [<Literal>]
+    let StateUnstarted = "unstarted"
