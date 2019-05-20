@@ -2,7 +2,6 @@ namespace Shared
 
 
 type LcsTeam =
-    private
     | C9
     | CG
     | CLG
