@@ -61,7 +61,7 @@ let getApiSchedule =
 
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
-        let lcsTeams = [C9; CG; CLG; FOX; FLY; GGS; OPT; Thieves; TL; TSM]
+        let lcsTeams = LcsTeam.lcsTeams
 
         // This should probably not be converted
         // Just let type provider provide types

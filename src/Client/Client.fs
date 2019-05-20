@@ -119,7 +119,7 @@ let view (model : Model) (dispatch : Msg -> unit) =
                 let teamName =
                     match model.HeadToHeadTeam with
                     | Some s -> s
-                    | None -> LcsTeam.Unknown
+                    | None -> LcsTeam.noneValue
                 yield TeamHeadToHead.view { Results = model.HeadToHeadResults
                                             Team = teamName
                                             HomeLink = (fun _ -> dispatch LoadTeamRecords) }

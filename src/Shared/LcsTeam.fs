@@ -2,6 +2,7 @@ namespace Shared
 
 
 type LcsTeam =
+    private
     | C9
     | CG
     | CLG
@@ -14,8 +15,13 @@ type LcsTeam =
     | TSM
     | Unknown
 
+
 [<RequireQualifiedAccess>]
 module LcsTeam =
+
+    let noneValue = LcsTeam.Unknown
+
+    let lcsTeams = [C9; CG; CLG; FOX; FLY; GGS; OPT; Thieves; TL; TSM]
 
     let toString = function
         | C9 -> "Cloud9"
@@ -42,3 +48,16 @@ module LcsTeam =
         | TL -> "TL"
         | TSM -> "TSM"
         | Unknown -> "??"
+
+    let create = function
+        | "100" -> Thieves
+        | "C9" -> C9
+        | "CG" -> CG
+        | "CLG" -> CLG
+        | "FOX" -> FOX
+        | "FLY" -> FLY
+        | "GGS" -> GGS
+        | "OPT" -> OPT
+        | "TL" -> TL
+        | "TSM" -> TSM
+        | _ -> LcsTeam.Unknown

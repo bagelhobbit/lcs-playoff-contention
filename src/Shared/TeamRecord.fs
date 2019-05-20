@@ -11,19 +11,6 @@ module TeamRecord =
           WinLoss: WinLoss
           Results: MatchResult list }
 
-    let private createTeam = function
-        | "100" -> Thieves
-        | "C9" -> C9
-        | "CG" -> CG
-        | "CLG" -> CLG
-        | "FOX" -> FOX
-        | "FLY" -> FLY
-        | "GGS" -> GGS
-        | "OPT" -> OPT
-        | "TL" -> TL
-        | "TSM" -> TSM
-        | _ -> LcsTeam.Unknown
-
     let private isTeamInGame teamCode event =
         event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) 
 
@@ -38,7 +25,7 @@ module TeamRecord =
             | "loss" -> true
             | _ -> true
         
-        { Opponent = createTeam opposingTeam.Code; Won = outcome }
+        { Opponent = LcsTeam.create opposingTeam.Code; Won = outcome }
 
     let private generateWinLoss teamCode events =
         events
