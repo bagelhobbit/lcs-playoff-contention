@@ -2,13 +2,12 @@ namespace Shared
 
 module TeamRecord = 
 
-    open Schedule
-    open Team
+    open Shared
 
     type WinLoss = { Wins: int; Losses: int }
-    type MatchResult = { Opponent: Team; Won: bool }
+    type MatchResult = { Opponent: LcsTeam; Won: bool }
     type TeamRecord = 
-        { Team: Team
+        { Team: LcsTeam
           WinLoss: WinLoss
           Results: MatchResult list }
 
@@ -23,7 +22,7 @@ module TeamRecord =
         | "OPT" -> OPT
         | "TL" -> TL
         | "TSM" -> TSM
-        | _ -> Team.Unknown
+        | _ -> LcsTeam.Unknown
 
     let private isTeamInGame teamCode event =
         event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) 
@@ -43,7 +42,7 @@ module TeamRecord =
 
     let private generateWinLoss teamCode events =
         events
-        |> Array.find (fun event -> event.Match.Teams |> Seq.exists (fun team -> team.Code = teamCode ) )
+        |> Array.find (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode ) )
         |> fun event -> event.Match.Teams |> List.find (fun team -> team.Code = teamCode)
         |> fun team -> { Wins = team.Record.Wins ; Losses = team.Record.Losses }
 
@@ -54,7 +53,7 @@ module TeamRecord =
         |> Array.toList
 
     let generateTeamRecord events team =
-        let teamCode = toCode team
+        let teamCode = LcsTeam.toCode team
 
         { Team = team
           WinLoss = generateWinLoss teamCode events

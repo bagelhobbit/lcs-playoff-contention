@@ -4,7 +4,7 @@ open Fable.React
 open Fable.React.Props
 open Fulma
 
-open Shared.Team
+open Shared
 open Shared.HeadToHead
 
 open Client.Styles
@@ -12,7 +12,7 @@ open Client.Styles
 
 type Model = {
     Results: HeadToHead list option
-    Team: Team
+    Team: LcsTeam
     HomeLink: unit -> unit
 }
 
@@ -33,7 +33,7 @@ let private createTeamTile (result: HeadToHead) =
 let private createTeamName team =
     Container.container [ ]
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-            [ Heading.h2 [ ] [ str ( (toString team) + " vs.") ] ] ]
+            [ Heading.h2 [ ] [ str ( (LcsTeam.toString team) + " vs.") ] ] ]
 
 let private createSectionTitle =
     Container.container [ ]
@@ -47,7 +47,7 @@ let private createBreadcrumbs team homeLink =
           Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
             [ a [ ] [ str "Head to Head" ] ]
           Breadcrumb.item [ Breadcrumb.Item.IsActive true ]
-            [ a [ ] [ str (toString team) ] ] ]
+            [ a [ ] [ str (LcsTeam.toString team) ] ] ]
 
 let view model =
     let results =

@@ -6,8 +6,6 @@ open FSharp.Data
 open FSharp.Control.Tasks.V2
 open Saturn
 
-open Shared.Schedule
-open Shared.Team
 open Shared.HeadToHead
 open Shared.TeamRecord
 open Shared
@@ -17,7 +15,7 @@ open PlayoffTeams
 
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
-open System
+
 
 let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" -> None | x -> Some x
 
@@ -72,7 +70,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
         // Conversion should move to schedule file, which should be refactored as well
         let lcsResults = 
             getApiSchedule
-            |> Array.filter (fun event -> event.State = StateCompleted)
+            |> Array.filter (fun event -> event.State = Schedule.StateCompleted)
             |> Array.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State
@@ -121,11 +119,11 @@ let getCurrentRecords() : Task<TeamRecord list> =
         return currentRecords 
     }
 
-let getLcsPlayoffStatuses teamRecords : Task<(Team * PlayoffStatus) list> =
+let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
     task {
         let remainingSchedule =
             getApiSchedule
-            |> Array.filter (fun event -> event.State = StateUnstarted)
+            |> Array.filter (fun event -> event.State = Schedule.StateUnstarted)
             |> Array.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State
@@ -183,7 +181,7 @@ let getHeadToHeads team : Task<HeadToHead list> =
     task {
         let lcsResults = 
             getApiSchedule
-            |> Array.filter (fun event -> event.State = StateCompleted)
+            |> Array.filter (fun event -> event.State = Schedule.StateCompleted)
             |> Array.map (fun event -> 
                 { StartTime = event.StartTime
                   State = event.State

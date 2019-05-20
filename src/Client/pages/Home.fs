@@ -4,7 +4,6 @@ open Fable.React
 open Fable.React.Props
 open Fulma
 
-open Shared.Team
 open Shared.TeamRecord
 open Shared
 
@@ -13,8 +12,8 @@ open Client.Styles
 
 type Model = {
     Records: TeamRecord list option
-    PlayoffStatuses: (Team * PlayoffStatus) list option
-    HeadToHeadLink: Team -> unit
+    PlayoffStatuses: (LcsTeam * PlayoffStatus) list option
+    HeadToHeadLink: LcsTeam -> unit
 }
 
 
@@ -39,7 +38,7 @@ let private createTile playoffStatuses headToHeadLink teamRecord =
 
     let createTiles result =
         let createOpponentTile =
-            Heading.h6 [ ] [ str (Team.toCode result.Opponent) ]
+            Heading.h6 [ ] [ str (LcsTeam.toCode result.Opponent) ]
 
         let createWinLossTile =
             if result.Won
@@ -55,7 +54,7 @@ let private createTile playoffStatuses headToHeadLink teamRecord =
     let teamTile =
         Tile.child [ ] 
             [ buttonLink "" (fun _ -> headToHeadLink teamRecord.Team)
-                [ Heading.h4 [ ] [ str (Team.toCode teamRecord.Team) ]
+                [ Heading.h4 [ ] [ str (LcsTeam.toCode teamRecord.Team) ]
                   Heading.h6 [ ] [ str (sprintf "%d-%d" teamRecord.WinLoss.Wins teamRecord.WinLoss.Losses) ] ] ]
 
     Tile.parent [ (getStatusModifier teamRecord.Team); Tile.Modifiers [ Modifier.BackgroundColor (Color.IsWhiteTer) ] ] (teamTile::tiles)

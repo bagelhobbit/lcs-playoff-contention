@@ -1,8 +1,6 @@
 module EliminatedTeams
 
 open Shared
-open Shared.Schedule
-open Shared.Team
 open Shared.TeamRecord
 
 let findEliminatedTeams teamRecords futureSchedule =
@@ -18,8 +16,8 @@ let findEliminatedTeams teamRecords futureSchedule =
             |> (fun team -> team.WinLoss.Wins)
 
         let filterFutureSchedule team1 team2 event =
-            let teamCode1 = toCode team1.Team
-            let teamCode2 = toCode team2.Team
+            let teamCode1 = LcsTeam.toCode team1.Team
+            let teamCode2 = LcsTeam.toCode team2.Team
 
             event.Match.Teams
             |> List.map (fun team -> team.Code)

@@ -2,17 +2,14 @@ namespace Shared
 
 module HeadToHead =
 
-    open Team
-    open Schedule
-
     type HeadToHeadResult = Win | Tie | Loss
     type HeadToHead = { Team: Team; Result: HeadToHeadResult }
 
     let generateHeadToHeads team pastEvents =
-        let teamCode = toCode team
+        let teamCode = LcsTeam.toCode team
 
         let createHeadToHead event =
-            let teamWon (team: Schedule.Team) =
+            let teamWon (team: Team) =
                 match team.Result.Outcome with
                 | "win" -> true
                 | "loss" -> false
@@ -42,16 +39,16 @@ module HeadToHead =
             | xs -> headToHead::xs
 
         pastEvents
-        |> Seq.filter (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) )
-        |> Seq.map createHeadToHead
-        |> Seq.sortBy (fun result -> result.Team)
-        |> Seq.fold combine []
+        |> Array.filter (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) )
+        |> Array.map createHeadToHead
+        |> Array.sortBy (fun result -> result.Team.Code)
+        |> Array.fold combine []
 
     let generateHeadToHeadResult team1 team2 pastEvents =
-        let teamCode1 = toCode team1
-        let teamCode2 = toCode team2
+        let teamCode1 = LcsTeam.toCode team1
+        let teamCode2 = LcsTeam.toCode team2
 
-        let teamWon (team: Schedule.Team) =
+        let teamWon (team: Team) =
             match team.Result.Outcome with
             | "win" -> true
             | "loss" -> false
@@ -67,9 +64,9 @@ module HeadToHead =
         
         let headToHeadWins =
             pastEvents
-            |> Seq.filter filterHeadToHeads
-            |> Seq.filter filterWinningTeams
-            |> Seq.length
+            |> Array.filter filterHeadToHeads
+            |> Array.filter filterWinningTeams
+            |> Array.length
            
         match headToHeadWins with
         | 2 -> Win

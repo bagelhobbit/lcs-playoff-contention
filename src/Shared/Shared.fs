@@ -8,7 +8,6 @@ module Route =
 module Constants =
     let totalLcsGames = 18
 
-open Team
 open TeamRecord
 open HeadToHead
 
@@ -18,6 +17,6 @@ type PlayoffStatus = Bye | Clinched | Unknown | Eliminated
 /// to learn more, read the docs at https://zaid-ajaj.github.io/Fable.Remoting/src/basics.html
 type IPlayoffApi = { 
     lcsTeamRecords : unit -> Async<TeamRecord list>
-    lcsPlayoffStatuses : TeamRecord list -> Async<(Team * PlayoffStatus) list>
-    teamHeadToHeadRecords : Team -> Async<HeadToHead list>
+    lcsPlayoffStatuses : TeamRecord list -> Async<(LcsTeam * PlayoffStatus) list>
+    teamHeadToHeadRecords : LcsTeam -> Async<HeadToHead list>
 }

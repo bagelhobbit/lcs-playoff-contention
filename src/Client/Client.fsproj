@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../Shared/Team.fs" />
+    <Compile Include="../Shared/LcsTeam.fs" />
     <Compile Include="../Shared/Schedule.fs" />
     <Compile Include="../Shared/TeamRecord.fs" />
     <Compile Include="../Shared/HeadToHead.fs" />

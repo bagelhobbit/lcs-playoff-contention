@@ -1,18 +1,21 @@
 namespace Shared
 
-module Team =
-    type Team =
-        | C9
-        | CG
-        | CLG
-        | FOX
-        | FLY
-        | GGS
-        | OPT
-        | Thieves
-        | TL
-        | TSM
-        | Unknown
+
+type LcsTeam =
+    | C9
+    | CG
+    | CLG
+    | FOX
+    | FLY
+    | GGS
+    | OPT
+    | Thieves
+    | TL
+    | TSM
+    | Unknown
+
+[<RequireQualifiedAccess>]
+module LcsTeam =
 
     let toString = function
         | C9 -> "Cloud9"
