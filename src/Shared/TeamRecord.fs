@@ -1,20 +1,20 @@
 namespace Shared
 
+
+type WinLoss = { Wins: int; Losses: int }
+type LcsResult = { Opponent: LcsTeam; Won: bool }
+type TeamRecord = 
+    { LcsTeam: LcsTeam
+      WinLoss: WinLoss
+      Results: LcsResult list }
+
+[<RequireQualifiedAccess>]
 module TeamRecord = 
-
-    open Shared
-
-    type WinLoss = { Wins: int; Losses: int }
-    type MatchResult = { Opponent: LcsTeam; Won: bool }
-    type TeamRecord = 
-        { Team: LcsTeam
-          WinLoss: WinLoss
-          Results: MatchResult list }
 
     let private isTeamInGame teamCode event =
         event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) 
 
-    let private createMatchResult teamCode event =
+    let private createLcsResult teamCode event =
         let opposingTeam =
             event.Match.Teams
             |> List.find (fun team -> team.Code <> teamCode)
@@ -27,21 +27,21 @@ module TeamRecord =
         
         { Opponent = LcsTeam.create opposingTeam.Code; Won = outcome }
 
-    let private generateWinLoss teamCode events =
+    let private createWinLoss teamCode events =
         events
         |> Array.find (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode ) )
         |> fun event -> event.Match.Teams |> List.find (fun team -> team.Code = teamCode)
         |> fun team -> { Wins = team.Record.Wins ; Losses = team.Record.Losses }
 
-    let private generateMatchResults teamCode events =
+    let private createLcsResults teamCode events =
         events
         |> Array.filter (isTeamInGame teamCode)
-        |> Array.map (createMatchResult teamCode)
+        |> Array.map (createLcsResult teamCode)
         |> Array.toList
 
-    let generateTeamRecord events team =
+    let create events team =
         let teamCode = LcsTeam.toCode team
 
-        { Team = team
-          WinLoss = generateWinLoss teamCode events
-          Results = generateMatchResults teamCode events }
+        { LcsTeam = team
+          WinLoss = createWinLoss teamCode events
+          Results = createLcsResults teamCode events }

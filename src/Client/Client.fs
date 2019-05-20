@@ -7,8 +7,6 @@ open Elmish.Navigation
 open Fable.React
 
 open Shared
-open Shared.TeamRecord
-open Shared.HeadToHead
 
 open Client.Styles
 

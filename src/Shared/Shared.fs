@@ -8,8 +8,6 @@ module Route =
 module Constants =
     let totalLcsGames = 18
 
-open TeamRecord
-open HeadToHead
 
 type PlayoffStatus = Bye | Clinched | Unknown | Eliminated
 

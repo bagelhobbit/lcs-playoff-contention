@@ -1,7 +1,6 @@
 module EliminatedTeams
 
 open Shared
-open Shared.TeamRecord
 
 let findEliminatedTeams teamRecords futureSchedule =
     let remainingGames =
@@ -16,8 +15,8 @@ let findEliminatedTeams teamRecords futureSchedule =
             |> (fun team -> team.WinLoss.Wins)
 
         let filterFutureSchedule team1 team2 event =
-            let teamCode1 = LcsTeam.toCode team1.Team
-            let teamCode2 = LcsTeam.toCode team2.Team
+            let teamCode1 = LcsTeam.toCode team1.LcsTeam
+            let teamCode2 = LcsTeam.toCode team2.LcsTeam
 
             event.Match.Teams
             |> List.map (fun team -> team.Code)
@@ -34,7 +33,7 @@ let findEliminatedTeams teamRecords futureSchedule =
             |> List.pairwise
             |> List.filter (fun (team1, team2) -> Seq.exists (filterFutureSchedule team1 team2) futureSchedule)
             |> unpairwise
-            |> List.map (fun team -> team.Team)
+            |> List.map (fun team -> team.LcsTeam)
 
         match tiedPotentialContenders with
         | [] -> minWins

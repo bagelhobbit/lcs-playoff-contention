@@ -5,7 +5,6 @@ open Fable.React.Props
 open Fulma
 
 open Shared
-open Shared.HeadToHead
 
 open Client.Styles
 

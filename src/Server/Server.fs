@@ -6,8 +6,6 @@ open FSharp.Data
 open FSharp.Control.Tasks.V2
 open Saturn
 
-open Shared.HeadToHead
-open Shared.TeamRecord
 open Shared
 
 open EliminatedTeams
@@ -102,7 +100,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
             // Reverse the comparer so teams with a better head to head record are at the top
             if team1.WinLoss = team2.WinLoss
             then 
-                let headToHead = generateHeadToHeadResult team1.Team team2.Team lcsResults
+                let headToHead = HeadToHeadResult.create team1.LcsTeam team2.LcsTeam lcsResults
 
                 match headToHead with
                 | Win -> -1
@@ -112,7 +110,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
 
         let currentRecords =
             lcsTeams
-            |> List.map (generateTeamRecord lcsResults)
+            |> List.map (TeamRecord.create lcsResults)
             |> List.sortByDescending (fun record -> record.WinLoss.Wins)
             |> List.sortWith descendingComparer
 
@@ -152,26 +150,26 @@ let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
 
         let eliminatedTeams = 
             findEliminatedTeams teamRecords remainingSchedule
-            |> List.map (fun team -> team.Team)
+            |> List.map (fun team -> team.LcsTeam)
 
         let playoffTeams =
             findPlayoffTeams teamRecords
-            |> List.map (fun team -> team.Team)
+            |> List.map (fun team -> team.LcsTeam)
 
         let playoffByes =
             findPlayoffByes teamRecords
-            |> List.map (fun team -> team.Team)
+            |> List.map (fun team -> team.LcsTeam)
 
         let assignPlayoffStatus team =
             let containsTeam =
                 [ eliminatedTeams; playoffTeams; playoffByes ]
-                |> List.map (List.contains team.Team)
+                |> List.map (List.contains team.LcsTeam)
 
             match containsTeam with
-            | _::_::[x] when x -> (team.Team, Bye)
-            | _::x::_ when x -> (team.Team, Clinched)
-            | x::_ when x -> (team.Team, Eliminated)
-            | _ -> (team.Team, Unknown)
+            | _::_::[x] when x -> (team.LcsTeam, Bye)
+            | _::x::_ when x -> (team.LcsTeam, Clinched)
+            | x::_ when x -> (team.LcsTeam, Eliminated)
+            | _ -> (team.LcsTeam, Unknown)
 
         return teamRecords
         |> List.map assignPlayoffStatus
@@ -208,7 +206,7 @@ let getHeadToHeads team : Task<HeadToHead list> =
                         { Type = event.Match.Strategy.Type
                           Count = event.Match.Strategy.Count } } } )
 
-        return generateHeadToHeads team lcsResults
+        return HeadToHeads.create team lcsResults
     }
 
 let playoffApi = {

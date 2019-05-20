@@ -1,11 +1,13 @@
 namespace Shared
 
-module HeadToHead =
 
-    type HeadToHeadResult = Win | Tie | Loss
-    type HeadToHead = { Team: Team; Result: HeadToHeadResult }
+type HeadToHeadResult = Win | Tie | Loss
+type HeadToHead = { Team: Team; Result: HeadToHeadResult }
 
-    let generateHeadToHeads team pastEvents =
+[<RequireQualifiedAccess>]
+module HeadToHeads =
+
+    let create team pastEvents =
         let teamCode = LcsTeam.toCode team
 
         let createHeadToHead event =
@@ -44,7 +46,10 @@ module HeadToHead =
         |> Array.sortBy (fun result -> result.Team.Code)
         |> Array.fold combine []
 
-    let generateHeadToHeadResult team1 team2 pastEvents =
+[<RequireQualifiedAccess>]
+module HeadToHeadResult =
+
+    let create team1 team2 pastEvents =
         let teamCode1 = LcsTeam.toCode team1
         let teamCode2 = LcsTeam.toCode team2
 

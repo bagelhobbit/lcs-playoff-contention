@@ -1,7 +1,6 @@
 module PlayoffTeams
 
 open Shared
-open Shared.TeamRecord
 
 let findPlayoffTeams teamRecords =
     let remainingGames =
