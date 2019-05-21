@@ -23,13 +23,13 @@ module HeadToHeads =
 
             if (teamWon currentTeam.Head)
             then { Team = opposingTeam.Head; Result = Win }
-            else { Team = currentTeam.Head; Result = Loss }
+            else { Team = opposingTeam.Head; Result = Loss }
 
 
         let combine results headToHead =
             match results with
             | [] -> [headToHead]
-            | x::xs when x.Team = headToHead.Team ->
+            | x::xs when x.Team.Code = headToHead.Team.Code ->
                 match (x.Result, headToHead.Result) with
                 | (Win, Loss) ->  { Team=x.Team; Result=Tie }::xs
                 | (Win, _) ->  { Team=x.Team; Result=Win }::xs

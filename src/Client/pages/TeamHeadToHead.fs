@@ -53,7 +53,7 @@ let view model =
         match model.Results with
         | Some results ->
             results
-            |> List.sortBy (fun headToHead -> headToHead.Result)
+            |> List.sortBy (fun headToHead -> headToHead.Result, headToHead.Team.Code)
             |> List.map createTeamTile
 
         | None ->
