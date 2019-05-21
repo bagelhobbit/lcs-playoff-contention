@@ -19,11 +19,13 @@ module HeadToHeads =
 
             let currentTeam, opposingTeam =
                 let teams = event.Match.Teams
-                teams |> List.partition (fun team -> team.Code = teamCode)
+                teams 
+                |> List.partition (fun team -> team.Code = teamCode)
+                |> fun (current, opposing) -> (current |> List.exactlyOne, opposing |> List.exactlyOne)
 
-            if (teamWon currentTeam.Head)
-            then { Team = opposingTeam.Head; Result = Win }
-            else { Team = opposingTeam.Head; Result = Loss }
+            if (teamWon currentTeam)
+            then { Team = opposingTeam; Result = Win }
+            else { Team = opposingTeam; Result = Loss }
 
 
         let combine results headToHead =

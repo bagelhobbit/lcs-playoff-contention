@@ -61,39 +61,10 @@ let getCurrentRecords() : Task<TeamRecord list> =
     task {
         let lcsTeams = LcsTeam.lcsTeams
 
-        // This should probably not be converted
-        // Just let type provider provide types
-        // But I wanted to delcare types for debugging/conversion
-
-        // Conversion should move to schedule file, which should be refactored as well
         let lcsResults = 
             getApiSchedule
-            |> Array.filter (fun event -> event.State = Schedule.StateCompleted)
-            |> Array.map (fun event -> 
-                { StartTime = event.StartTime
-                  State = event.State
-                  Type = event.Type
-                  BlockName = event.BlockName
-                  League =
-                    { Name = event.League.Name
-                      Slug = event.League.Slug  }
-                  Match =
-                    { Id = event.Match.Id
-                      Teams = 
-                        event.Match.Teams
-                        |> Array.map (fun team ->
-                            { Name = team.Name
-                              Code = team.Code
-                              Result = 
-                                { Outcome = team.Result.Outcome
-                                  GameWins = team.Result.GameWins }
-                              Record = 
-                                { Wins = team.Record.Wins
-                                  Losses = team.Record.Losses } } )
-                        |> List.ofArray
-                      Strategy =
-                        { Type = event.Match.Strategy.Type
-                          Count = event.Match.Strategy.Count } } } )
+            |> Array.filter (fun event -> event.State = LeagueEvent.StateCompleted)
+            |> Array.map LeagueEvent.create
 
         let descendingComparer team1 team2 =
             // 1 - x > y; 0 - x = y; -1 - x < y
@@ -121,32 +92,8 @@ let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
     task {
         let remainingSchedule =
             getApiSchedule
-            |> Array.filter (fun event -> event.State = Schedule.StateUnstarted)
-            |> Array.map (fun event -> 
-                { StartTime = event.StartTime
-                  State = event.State
-                  Type = event.Type
-                  BlockName = event.BlockName
-                  League =
-                    { Name = event.League.Name
-                      Slug = event.League.Slug  }
-                  Match =
-                    { Id = event.Match.Id
-                      Teams = 
-                        event.Match.Teams
-                        |> Array.map (fun team ->
-                            { Name = team.Name
-                              Code = team.Code
-                              Result = 
-                                { Outcome = team.Result.Outcome
-                                  GameWins = team.Result.GameWins }
-                              Record = 
-                                { Wins = team.Record.Wins
-                                  Losses = team.Record.Losses } } )
-                        |> List.ofArray
-                      Strategy =
-                        { Type = event.Match.Strategy.Type
-                          Count = event.Match.Strategy.Count } } } )
+            |> Array.filter (fun event -> event.State = LeagueEvent.StateUnstarted)
+            |> Array.map LeagueEvent.create
 
         let eliminatedTeams = 
             findEliminatedTeams teamRecords remainingSchedule
@@ -179,32 +126,8 @@ let getHeadToHeads team : Task<HeadToHead list> =
     task {
         let lcsResults = 
             getApiSchedule
-            |> Array.filter (fun event -> event.State = Schedule.StateCompleted)
-            |> Array.map (fun event -> 
-                { StartTime = event.StartTime
-                  State = event.State
-                  Type = event.Type
-                  BlockName = event.BlockName
-                  League =
-                    { Name = event.League.Name
-                      Slug = event.League.Slug  }
-                  Match =
-                    { Id = event.Match.Id
-                      Teams = 
-                        event.Match.Teams
-                        |> Array.map (fun team ->
-                            { Name = team.Name
-                              Code = team.Code
-                              Result = 
-                                { Outcome = team.Result.Outcome
-                                  GameWins = team.Result.GameWins }
-                              Record = 
-                                { Wins = team.Record.Wins
-                                  Losses = team.Record.Losses } } )
-                        |> List.ofArray
-                      Strategy =
-                        { Type = event.Match.Strategy.Type
-                          Count = event.Match.Strategy.Count } } } )
+            |> Array.filter (fun event -> event.State = LeagueEvent.StateCompleted)
+            |> Array.map LeagueEvent.create
 
         return HeadToHeads.create team lcsResults
     }
