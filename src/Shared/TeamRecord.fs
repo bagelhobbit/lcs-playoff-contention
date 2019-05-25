@@ -1,43 +1,47 @@
 namespace Shared
 
+
+type WinLoss = { Wins: int; Losses: int }
+type LcsResult = { Opponent: LcsTeam; Won: bool }
+type TeamRecord = 
+    { LcsTeam: LcsTeam
+      WinLoss: WinLoss
+      Results: LcsResult list }
+
+[<RequireQualifiedAccess>]
 module TeamRecord = 
 
-    open Team
-    open Schedule
+    let private isTeamInGame teamCode event =
+        event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) 
 
-    type WinLoss = { wins: int; losses: int }
-    type MatchResult = { opponent: Team; won: bool }
-    type TeamRecord = 
-        { team: Team
-          winLoss: WinLoss
-          results: MatchResult list
-        }
+    let private createLcsResult teamCode event =
+        let opposingTeam =
+            event.Match.Teams
+            |> List.find (fun team -> team.Code <> teamCode)
 
-    let private isTeamInGame team result =
-        result.winner = team || result.loser = team
+        let outcome =
+            match opposingTeam.Result.Outcome with
+            | "win" -> false
+            | "loss" -> true
+            | _ -> true
+        
+        { Opponent = LcsTeam.create opposingTeam.Code; Won = outcome }
 
-    let private createMatchResult team result =
-        if result.winner = team 
-        then { opponent=result.loser; won=true }
-        else { opponent=result.winner; won=false }
+    let private createWinLoss teamCode events =
+        events
+        |> Array.find (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode ) )
+        |> fun event -> event.Match.Teams |> List.find (fun team -> team.Code = teamCode)
+        |> fun team -> { Wins = team.Record.Wins ; Losses = team.Record.Losses }
 
-    let generateWinLoss team pastResults =
-        let (wins, losses) =
-            pastResults
-            |> Seq.filter (isTeamInGame team)
-            |> Seq.toList
-            |> List.partition (fun result -> result.winner = team)
+    let private createLcsResults teamCode events =
+        events
+        |> Array.filter (isTeamInGame teamCode)
+        |> Array.map (createLcsResult teamCode)
+        |> Array.toList
 
-        { wins = wins.Length; losses = losses.Length }
+    let create events team =
+        let teamCode = LcsTeam.toCode team
 
-    let generateMatchResults team pastResults =
-        pastResults
-        |> Seq.filter (isTeamInGame team)
-        |> Seq.map (createMatchResult team)
-        |> Seq.toList
-
-    let generateTeamRecord results team =
-        { team = team
-          winLoss = generateWinLoss team results
-          results = generateMatchResults team results
-        }
+        { LcsTeam = team
+          WinLoss = createWinLoss teamCode events
+          Results = createLcsResults teamCode events }
