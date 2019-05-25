@@ -8,6 +8,7 @@ open Saturn
 
 open Shared
 
+open LeagueScheduleJson
 open EliminatedTeams
 open PlayoffTeams
 
@@ -31,7 +32,7 @@ let getApiSchedule =
             query = [ "hl", "en-US"; "leagueId", naLeagueId],
             headers = [ "x-api-key", apiKey] )
 
-    let schedule = LeagueEventsJson.Parse(apiSite).Data.Schedule
+    let schedule = LeagueSchedule.Parse(apiSite).Data.Schedule
 
     let regularSeasonEvents =
         schedule.Events
@@ -48,7 +49,7 @@ let getApiSchedule =
         // We should never need more than weeks 1 & 2
         // since that's the most that is missing after the LCS finals
         let oldEvents =
-            LeagueEventsJson.Parse(oldEventsJson).Data.Schedule.Events
+            LeagueSchedule.Parse(oldEventsJson).Data.Schedule.Events
             |> Array.filter (fun event -> event.BlockName = "Week 1" || event.BlockName = "Week 2")
 
         Array.append regularSeasonEvents oldEvents
@@ -63,8 +64,8 @@ let getCurrentRecords() : Task<TeamRecord list> =
 
         let lcsResults = 
             getApiSchedule
-            |> Array.filter (fun event -> event.State = LeagueEvent.StateCompleted)
-            |> Array.map LeagueEvent.create
+            |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
+            |> Array.map LeagueSchedule.create
 
         let descendingComparer team1 team2 =
             // 1 - x > y; 0 - x = y; -1 - x < y
@@ -92,8 +93,8 @@ let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
     task {
         let remainingSchedule =
             getApiSchedule
-            |> Array.filter (fun event -> event.State = LeagueEvent.StateUnstarted)
-            |> Array.map LeagueEvent.create
+            |> Array.filter (fun event -> event.State = LeagueSchedule.StateUnstarted)
+            |> Array.map LeagueSchedule.create
 
         let eliminatedTeams = 
             findEliminatedTeams teamRecords remainingSchedule
@@ -126,8 +127,8 @@ let getHeadToHeads team : Task<HeadToHead list> =
     task {
         let lcsResults = 
             getApiSchedule
-            |> Array.filter (fun event -> event.State = LeagueEvent.StateCompleted)
-            |> Array.map LeagueEvent.create
+            |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
+            |> Array.map LeagueSchedule.create
 
         return HeadToHeads.create team lcsResults
     }
