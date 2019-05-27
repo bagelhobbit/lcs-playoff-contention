@@ -22,48 +22,12 @@ let publicPath = Path.GetFullPath "../Client/public"
 
 let port = "SERVER_PORT" |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
-let getApiSchedule =
-    let naLeagueId = "98767991299243165"
-    let apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
-
-    let apiSite =
-        // This should probably be rate limited somewhat based on last updated time
-        Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
-            query = [ "hl", "en-US"; "leagueId", naLeagueId],
-            headers = [ "x-api-key", apiKey] )
-
-    let schedule = LeagueSchedule.Parse(apiSite).Data.Schedule
-
-    let regularSeasonEvents =
-        schedule.Events
-        |> Array.filter (fun event -> event.BlockName.Contains "Week")
-
-    // Total matches: 9 weeks * 10 games/week = 90 games
-    if(regularSeasonEvents |> Array.length <> 90)
-    then
-        let oldEventsJson =
-            Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
-                query = [ "hl", "en-US"; "leagueId", naLeagueId; "pageToken", schedule.Pages.Older],
-                headers = [ "x-api-key", apiKey] )
-
-        // We should never need more than weeks 1 & 2
-        // since that's the most that is missing after the LCS finals
-        let oldEvents =
-            LeagueSchedule.Parse(oldEventsJson).Data.Schedule.Events
-            |> Array.filter (fun event -> event.BlockName = "Week 1" || event.BlockName = "Week 2")
-
-        Array.append regularSeasonEvents oldEvents
-        |> Array.sortBy (fun event -> event.StartTime)
-    else
-        regularSeasonEvents
-        |> Array.sortBy (fun event -> event.StartTime)
-
 let getCurrentRecords() : Task<TeamRecord list> =
     task {
         let lcsTeams = LcsTeam.lcsTeams
 
         let lcsResults = 
-            getApiSchedule
+            LeagueSchedule.getSchedule
             |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
             |> Array.map LeagueSchedule.create
 
@@ -92,7 +56,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
 let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
     task {
         let remainingSchedule =
-            getApiSchedule
+            LeagueSchedule.getSchedule
             |> Array.filter (fun event -> event.State = LeagueSchedule.StateUnstarted)
             |> Array.map LeagueSchedule.create
 
@@ -126,7 +90,7 @@ let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
 let getHeadToHeads team : Task<HeadToHead list> =
     task {
         let lcsResults = 
-            getApiSchedule
+            LeagueSchedule.getSchedule
             |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
             |> Array.map LeagueSchedule.create
 
