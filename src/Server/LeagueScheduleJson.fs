@@ -3,9 +3,10 @@ namespace LeagueScheduleJson
 open FSharp.Data
 
 open Shared
+open LeagueTournamentJson
 
 
-type LeagueSchedule = JsonProvider<"eventBasic.json">
+type LeagueSchedule = JsonProvider<"scheduleBasic.json">
 
 
 [<RequireQualifiedAccess>]
@@ -63,9 +64,13 @@ module LeagueSchedule =
 
         let schedule = LeagueSchedule.Parse(apiSite).Data.Schedule
 
+        let regularSeasonFilter (event: LeagueSchedule.Event) =
+            event.StartTime.Date > LeagueTournament.mostRecentTournament.StartDate.Date &&
+            event.BlockName.Contains "Week"
+
         let regularSeasonEvents =
             schedule.Events
-            |> Array.filter (fun event -> event.BlockName.Contains "Week")
+            |> Array.filter regularSeasonFilter
 
         // Total matches: 9 weeks * 10 games/week = 90 games
         if(regularSeasonEvents |> Array.length <> 90)
@@ -75,11 +80,9 @@ module LeagueSchedule =
                     query = [ "hl", "en-US"; "leagueId", naLeagueId; "pageToken", schedule.Pages.Older],
                     headers = [ "x-api-key", apiKey] )
 
-            // We should never need more than weeks 1 & 2
-            // since that's the most that is missing after the LCS finals
             let oldEvents =
                 LeagueSchedule.Parse(oldEventsJson).Data.Schedule.Events
-                |> Array.filter (fun event -> event.BlockName = "Week 1" || event.BlockName = "Week 2")
+                |> Array.filter regularSeasonFilter
 
             Array.append regularSeasonEvents oldEvents
             |> Array.sortBy (fun event -> event.StartTime)
