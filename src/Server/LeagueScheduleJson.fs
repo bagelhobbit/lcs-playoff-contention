@@ -52,17 +52,25 @@ module LeagueSchedule =
                 { Type = event.Match.Strategy.Type
                   Count = event.Match.Strategy.Count } } }
 
-    let getSchedule =
+    let private getScheduleJson pageToken =
         let naLeagueId = "98767991299243165"
         let apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
 
-        let apiSite =
-            // This should probably be rate limited somewhat based on last updated time
-            Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
-                query = [ "hl", "en-US"; "leagueId", naLeagueId],
-                headers = [ "x-api-key", apiKey] )
+        let query = 
+            let baseQuery = ["hl", "en-US"; "leagueId", naLeagueId]
 
-        let schedule = LeagueSchedule.Parse(apiSite).Data.Schedule
+            match pageToken with
+            | Some token -> baseQuery @ ["pageToken", token]
+            | None -> baseQuery
+
+        Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
+            query = query,
+            headers = [ "x-api-key", apiKey] )
+
+    let getSchedule =
+        let schedule =
+            let scheduleJson = getScheduleJson None
+            LeagueSchedule.Parse(scheduleJson).Data.Schedule
 
         let regularSeasonFilter (event: LeagueSchedule.Event) =
             event.StartTime.Date > LeagueTournament.mostRecentTournament.StartDate.Date &&
@@ -75,10 +83,7 @@ module LeagueSchedule =
         // Total matches: 9 weeks * 10 games/week = 90 games
         if(regularSeasonEvents |> Array.length <> 90)
         then
-            let oldEventsJson =
-                Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
-                    query = [ "hl", "en-US"; "leagueId", naLeagueId; "pageToken", schedule.Pages.Older],
-                    headers = [ "x-api-key", apiKey] )
+            let oldEventsJson = getScheduleJson <| Some schedule.Pages.Older
 
             let oldEvents =
                 LeagueSchedule.Parse(oldEventsJson).Data.Schedule.Events
