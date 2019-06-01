@@ -69,7 +69,7 @@ let private playoffLegend =
 let private sectionTitle =
     Container.container [ ]
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-            [ Heading.h2 [ ] [ str "LCS 2019 Spring Split Results"] ] ]
+            [ Heading.h2 [ ] [ str "LCS 2019 Summer Split Results"] ] ]
 
 let view model =
     let tiles = 
