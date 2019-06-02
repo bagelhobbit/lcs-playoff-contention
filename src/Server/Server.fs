@@ -1,8 +1,6 @@
 open System.IO
 open System.Threading.Tasks
 
-open FSharp.Data
-
 open FSharp.Control.Tasks.V2
 open Saturn
 

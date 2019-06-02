@@ -44,7 +44,7 @@ module LeagueSchedule =
                       Result = 
                         { Outcome = team.Result.Outcome
                           GameWins = team.Result.GameWins }
-                      Record = 
+                      Record =
                         { Wins = team.Record.Wins
                           Losses = team.Record.Losses } } )
                 |> List.ofArray
@@ -73,7 +73,7 @@ module LeagueSchedule =
             LeagueSchedule.Parse(scheduleJson).Data.Schedule
 
         let regularSeasonFilter (event: LeagueSchedule.Event) =
-            event.StartTime.Date > LeagueTournament.mostRecentTournament.StartDate.Date &&
+            event.StartTime.Date >= LeagueTournament.mostRecentTournament.StartDate.Date &&
             event.BlockName.Contains "Week"
 
         let regularSeasonEvents =
