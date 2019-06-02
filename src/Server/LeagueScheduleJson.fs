@@ -6,7 +6,7 @@ open Shared
 open LeagueTournamentJson
 
 
-type LeagueSchedule = JsonProvider<"scheduleBasic.json">
+type LeagueSchedule = JsonProvider<"scheduleBasic.json", SampleIsList=true>
 
 
 [<RequireQualifiedAccess>]
@@ -83,13 +83,18 @@ module LeagueSchedule =
         // Total matches: 9 weeks * 10 games/week = 90 games
         if(regularSeasonEvents |> Array.length <> 90)
         then
-            let oldEventsJson = getScheduleJson <| Some schedule.Pages.Older
+            let page =
+                match schedule.Pages.Newer with
+                | Some s -> s
+                | None -> schedule.Pages.Older
 
-            let oldEvents =
-                LeagueSchedule.Parse(oldEventsJson).Data.Schedule.Events
+            let extraEventsJson = getScheduleJson <| Some page
+
+            let extraEvents =
+                LeagueSchedule.Parse(extraEventsJson).Data.Schedule.Events
                 |> Array.filter regularSeasonFilter
 
-            Array.append regularSeasonEvents oldEvents
+            Array.append regularSeasonEvents extraEvents
             |> Array.sortBy (fun event -> event.StartTime)
         else
             regularSeasonEvents
