@@ -1,5 +1,7 @@
 module Client.App
 
+open System
+
 open Elmish
 open Elmish.React
 open Elmish.Navigation
@@ -16,7 +18,8 @@ type PageModel =
     | HomePageModel
     | HeadToHeadPageModel
 
-type Model = { 
+type Model = {
+    SplitTitle : string
     TeamRecords: Option<TeamRecord list>
     PlayoffStatuses: Option<(LcsTeam * PlayoffStatus) list>
     HeadToHeadResults: Option<HeadToHead list>
@@ -25,8 +28,10 @@ type Model = {
 }
 
 type Msg =
+    | LoadSplitTitle
     | LoadTeamRecords
     | LoadTeamHeadToHead of LcsTeam
+    | SplitTitleLoaded of Result<string, exn>
     | TeamRecordsLoaded of Result<TeamRecord list, exn>
     | PlayoffStatusesLoaded of Result<(LcsTeam * PlayoffStatus) list, exn>
     | HeadToHeadResult of Result<HeadToHead list, exn>
@@ -45,26 +50,46 @@ module Server =
 let initialTeamRecord = Server.api.lcsTeamRecords
 let playoffStatuses = Server.api.lcsPlayoffStatuses
 let headToHeadResults = Server.api.teamHeadToHeadRecords
+let splitTitle = Server.api.splitTitle
 
 let init () : Model * Cmd<Msg> =
     let initialModel = 
-        { TeamRecords = None
+        { SplitTitle = "LCS"
+          TeamRecords = None
           PlayoffStatuses = None
           HeadToHeadResults = None
           HeadToHeadTeam = None
           PageModel = HomePageModel }
     let loadTeamRecordsCmd =
         Cmd.OfAsync.perform
-            initialTeamRecord
+            splitTitle
             ()
-            (Ok >> TeamRecordsLoaded)
+            (Ok >> SplitTitleLoaded)
     initialModel, loadTeamRecordsCmd
 
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel, msg with
+    | _, LoadSplitTitle ->
+        let nextModel = { currentModel with PageModel = HomePageModel}
+        let nextCmd = 
+            Cmd.OfAsync.perform
+                splitTitle
+                ()
+                (Ok >> SplitTitleLoaded)
+        nextModel, nextCmd
+
     | _, LoadTeamRecords ->
         let nextModel = { currentModel with PageModel = HomePageModel }
         let nextCmd =
+            Cmd.OfAsync.perform
+                initialTeamRecord
+                ()
+                (Ok >> TeamRecordsLoaded)
+        nextModel, nextCmd
+
+    | _, SplitTitleLoaded (Ok title) ->
+        let nextModel = { currentModel with SplitTitle = title }
+        let nextCmd = 
             Cmd.OfAsync.perform
                 initialTeamRecord
                 ()
@@ -112,7 +137,8 @@ let view (model : Model) (dispatch : Msg -> unit) =
             | HomePageModel ->
                 yield Home.view { Records = model.TeamRecords
                                   PlayoffStatuses = model.PlayoffStatuses
-                                  HeadToHeadLink = (fun s -> dispatch (LoadTeamHeadToHead s) ) }
+                                  HeadToHeadLink = (fun s -> dispatch (LoadTeamHeadToHead s) )
+                                  SplitTitle = model.SplitTitle }
             | HeadToHeadPageModel ->
                 let teamName =
                     match model.HeadToHeadTeam with

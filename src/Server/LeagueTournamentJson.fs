@@ -1,6 +1,7 @@
 namespace LeagueTournamentJson
 
 open FSharp.Data
+open System
 
 type LeagueTournaments = JsonProvider<"tournamentBasic.json">
 
@@ -20,3 +21,11 @@ module LeagueTournament =
 
         tournaments
         |> Array.maxBy (fun t -> t.StartDate)
+
+    let currentSplitSeason =
+        let currentSeason =
+            if mostRecentTournament.Slug.EndsWith("spring")
+            then "Spring"
+            else "Summer"
+        
+        sprintf "LCS %d %s"  DateTime.Now.Year currentSeason

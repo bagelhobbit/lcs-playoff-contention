@@ -6,6 +6,7 @@ open Saturn
 
 open Shared
 
+open LeagueTournamentJson
 open LeagueScheduleJson
 open EliminatedTeams
 open PlayoffTeams
@@ -95,10 +96,16 @@ let getHeadToHeads team : Task<HeadToHead list> =
         return HeadToHeads.create team lcsResults
     }
 
+let getSplitTitle() : Task<string> =
+    task {
+        return LeagueTournament.currentSplitSeason
+    }
+
 let playoffApi = {
     lcsTeamRecords = getCurrentRecords >> Async.AwaitTask
     lcsPlayoffStatuses = getLcsPlayoffStatuses >> Async.AwaitTask
     teamHeadToHeadRecords = getHeadToHeads >> Async.AwaitTask
+    splitTitle = getSplitTitle >> Async.AwaitTask
 }
 
 let webApp =
