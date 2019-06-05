@@ -78,7 +78,11 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
                 (Ok >> SplitTitleLoaded)
         nextModel, nextCmd
 
-    | _, LoadTeamRecords ->
+    | { TeamRecords = Some _ }, LoadTeamRecords ->
+        let nextModel = { currentModel with PageModel = HomePageModel }
+        nextModel, Cmd.none
+
+    | { TeamRecords = None }, LoadTeamRecords ->
         let nextModel = { currentModel with PageModel = HomePageModel }
         let nextCmd =
             Cmd.OfAsync.perform
