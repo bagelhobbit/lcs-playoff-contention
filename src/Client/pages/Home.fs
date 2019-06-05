@@ -13,6 +13,7 @@ type Model = {
     Records: TeamRecord list option
     PlayoffStatuses: (LcsTeam * PlayoffStatus) list option
     HeadToHeadLink: LcsTeam -> unit
+    SplitTitle: string
 }
 
 
@@ -66,10 +67,10 @@ let private playoffLegend =
                   span [ ClassName "legend-clinched" ] [ str "Clinch Playoffs" ]
                   span [ ClassName "legend-eliminated" ] [ str "Eliminated" ] ] ] ]
 
-let private sectionTitle =
+let private sectionTitle splitTitle =
     Container.container [ ]
         [ Content.content [ Content.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
-            [ Heading.h2 [ ] [ str "LCS 2019 Spring Split Results"] ] ]
+            [ Heading.h2 [ ] [ str (splitTitle + " Split Results") ] ] ]
 
 let view model =
     let tiles = 
@@ -80,6 +81,6 @@ let view model =
         | None _ ->
             []
     div [ ]
-        [ sectionTitle
+        [ sectionTitle model.SplitTitle
           playoffLegend
           Tile.ancestor [ Tile.IsVertical ] tiles ]

@@ -3,9 +3,10 @@ namespace LeagueScheduleJson
 open FSharp.Data
 
 open Shared
+open LeagueTournamentJson
 
 
-type LeagueSchedule = JsonProvider<"C:\Users\Evan\Documents\code\F#\PlayoffContentionWeb\src\server\eventBasic.json">
+type LeagueSchedule = JsonProvider<"scheduleBasic.json", SampleIsList=true>
 
 
 [<RequireQualifiedAccess>]
@@ -43,10 +44,58 @@ module LeagueSchedule =
                       Result = 
                         { Outcome = team.Result.Outcome
                           GameWins = team.Result.GameWins }
-                      Record = 
+                      Record =
                         { Wins = team.Record.Wins
                           Losses = team.Record.Losses } } )
                 |> List.ofArray
               Strategy =
                 { Type = event.Match.Strategy.Type
                   Count = event.Match.Strategy.Count } } }
+
+    let private getScheduleJson pageToken =
+        let naLeagueId = "98767991299243165"
+        let apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
+
+        let query = 
+            let baseQuery = ["hl", "en-US"; "leagueId", naLeagueId]
+
+            match pageToken with
+            | Some token -> baseQuery @ ["pageToken", token]
+            | None -> baseQuery
+
+        Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getSchedule", httpMethod = "GET",
+            query = query,
+            headers = [ "x-api-key", apiKey] )
+
+    let getSchedule =
+        let schedule =
+            let scheduleJson = getScheduleJson None
+            LeagueSchedule.Parse(scheduleJson).Data.Schedule
+
+        let regularSeasonFilter (event: LeagueSchedule.Event) =
+            event.StartTime.Date >= LeagueTournament.mostRecentTournament.StartDate.Date &&
+            event.BlockName.Contains "Week"
+
+        let regularSeasonEvents =
+            schedule.Events
+            |> Array.filter regularSeasonFilter
+
+        // Total matches: 9 weeks * 10 games/week = 90 games
+        if(regularSeasonEvents |> Array.length <> 90)
+        then
+            let page =
+                match schedule.Pages.Newer with
+                | Some s -> s
+                | None -> schedule.Pages.Older
+
+            let extraEventsJson = getScheduleJson <| Some page
+
+            let extraEvents =
+                LeagueSchedule.Parse(extraEventsJson).Data.Schedule.Events
+                |> Array.filter regularSeasonFilter
+
+            Array.append regularSeasonEvents extraEvents
+            |> Array.sortBy (fun event -> event.StartTime)
+        else
+            regularSeasonEvents
+            |> Array.sortBy (fun event -> event.StartTime)

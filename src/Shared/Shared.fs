@@ -17,4 +17,5 @@ type IPlayoffApi = {
     lcsTeamRecords : unit -> Async<TeamRecord list>
     lcsPlayoffStatuses : TeamRecord list -> Async<(LcsTeam * PlayoffStatus) list>
     teamHeadToHeadRecords : LcsTeam -> Async<HeadToHead list>
+    splitTitle : unit -> Async<string>
 }
