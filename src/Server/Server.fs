@@ -26,7 +26,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
         let lcsTeams = LcsTeam.lcsTeams
 
         let lcsResults = 
-            LeagueSchedule.getSchedule
+            LeagueSchedule.getSchedule()
             |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
             |> Array.map LeagueSchedule.create
 
@@ -55,7 +55,7 @@ let getCurrentRecords() : Task<TeamRecord list> =
 let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
     task {
         let remainingSchedule =
-            LeagueSchedule.getSchedule
+            LeagueSchedule.getSchedule()
             |> Array.filter (fun event -> event.State = LeagueSchedule.StateUnstarted)
             |> Array.map LeagueSchedule.create
 
@@ -89,7 +89,7 @@ let getLcsPlayoffStatuses teamRecords : Task<(LcsTeam * PlayoffStatus) list> =
 let getHeadToHeads team : Task<HeadToHead list> =
     task {
         let lcsResults = 
-            LeagueSchedule.getSchedule
+            LeagueSchedule.getSchedule()
             |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
             |> Array.map LeagueSchedule.create
 

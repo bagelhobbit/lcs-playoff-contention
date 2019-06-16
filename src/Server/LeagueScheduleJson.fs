@@ -67,7 +67,7 @@ module LeagueSchedule =
             query = query,
             headers = [ "x-api-key", apiKey] )
 
-    let getSchedule =
+    let getSchedule () =
         let schedule =
             let scheduleJson = getScheduleJson None
             LeagueSchedule.Parse(scheduleJson).Data.Schedule
