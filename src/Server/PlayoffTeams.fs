@@ -20,7 +20,7 @@ let findPlayoffTeams teamRecords =
 
         match tiedPotentialContenders with
         | [] -> minWins
-        | [_] -> minWins - 1
+        //| [_] -> minWins - 1
         | _ -> 18
 
     teamRecords
