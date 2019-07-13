@@ -83,10 +83,19 @@ module LeagueSchedule =
         // Total matches: 9 weeks * 10 games/week = 90 games
         if(regularSeasonEvents |> Array.length <> 90)
         then
+            let containsWeek1 = 
+                let numWeek1Games =
+                    regularSeasonEvents 
+                    |> Array.filter (fun x -> x.BlockName = "Week 1") 
+                    |> Array.length
+
+                numWeek1Games = 10
+
             let page =
-                match schedule.Pages.Newer with
-                | Some s -> s
-                | None -> schedule.Pages.Older
+                match schedule.Pages.Newer, containsWeek1 with
+                | Some s, true -> s
+                | Some _, false -> schedule.Pages.Older
+                | None, _ -> schedule.Pages.Older
 
             let extraEventsJson = getScheduleJson <| Some page
 
