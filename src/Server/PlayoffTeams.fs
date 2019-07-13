@@ -11,7 +11,7 @@ let findPlayoffTeams teamRecords =
         let minWins =
             teamRecords
             |> List.sortByDescending (fun team -> team.WinLoss.Wins)
-            |> List.item 5
+            |> List.item 6 // 7th place
             |> (fun team -> team.WinLoss.Wins)
 
         let tiedPotentialContenders =
@@ -20,11 +20,15 @@ let findPlayoffTeams teamRecords =
 
         match tiedPotentialContenders with
         | [] -> minWins
-        //| [_] -> minWins - 1
+        | [_] -> minWins - 1
         | _ -> 18
 
+    // To secure playoffs a team needs to have enough wins to not get knocked out of the top 6 
+    // assuming they never win another game, and any challenger wins all their remaining games
+    // winsAbove7th = teamWins - 7thWins
+    // teamWins + winsAbove7th > 7thWins + remainingGames
     teamRecords
-    |> List.filter (fun team -> team.WinLoss.Wins + remainingGames > minimunRequiredWins)
+    |> List.filter (fun team -> team.WinLoss.Wins + ( team.WinLoss.Wins - minimunRequiredWins) > ( minimunRequiredWins + remainingGames ) ) 
 
 let findPlayoffByes teamRecords =
     let remainingGames =
