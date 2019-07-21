@@ -57,4 +57,4 @@ let findPlayoffByes teamRecords =
             | _ -> 18
 
         teamRecords
-        |> List.filter (fun team -> team.WinLoss.Wins + remainingGames > minimunRequiredWins)
+        |> List.filter (fun team -> team.WinLoss.Wins + ( team.WinLoss.Wins - minimunRequiredWins ) > (minimunRequiredWins + remainingGames ) )
