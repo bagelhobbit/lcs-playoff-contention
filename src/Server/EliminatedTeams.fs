@@ -36,9 +36,9 @@ let findEliminatedTeams teamRecords futureSchedule =
             |> List.map (fun team -> team.LcsTeam)
 
         match tiedPotentialContenders with
-        | [] -> minWins
+        | [] -> minWins - 1
         | [_] -> minWins
-        | _ -> minWins + 1
+        | _ -> minWins + tiedPotentialContenders.Length - 1
 
     teamRecords
     |> List.filter (fun team -> team.WinLoss.Wins + remainingGames < minimunRequiredWins)

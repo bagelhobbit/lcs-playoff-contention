@@ -18,14 +18,10 @@ let findPlayoffTeams teamRecords =
             teamRecords
             |> List.filter ( fun team -> team.WinLoss.Wins = minWins )
 
-        printfn "%A" ( tiedPotentialContenders |> List.map ( fun x -> x.LcsTeam) )
-
         match tiedPotentialContenders with
         | [] -> minWins
-        | [_] -> minWins - 1
+        | [_] -> minWins + 1
         | _ -> minWins + tiedPotentialContenders.Length - 1
-
-    printfn "%d : %d" minimunRequiredWins remainingGames
 
     // To secure playoffs a team needs to have enough wins to not get knocked out of the top 6 
     // assuming they never win another game, and any challenger wins all their remaining games
@@ -57,8 +53,8 @@ let findPlayoffByes teamRecords =
 
             match tiedPotentialContenders with
             | [] -> minWins
-            | [_] -> minWins
-            | _ -> 18
+            | [_] -> minWins + 1
+            | _ -> minWins + tiedPotentialContenders.Length - 1
 
         teamRecords
         |> List.filter ( fun team -> team.WinLoss.Wins + ( team.WinLoss.Wins - minimunRequiredWins ) > ( minimunRequiredWins + remainingGames ) )
