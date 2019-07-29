@@ -11,7 +11,7 @@ let findEliminatedTeams teamRecords futureSchedule =
         let minWins =
             teamRecords
             |> List.sortByDescending (fun team -> team.WinLoss.Wins)
-            |> List.item 5
+            |> List.item 6 // 7th place
             |> (fun team -> team.WinLoss.Wins)
 
         let filterFutureSchedule team1 team2 event =
@@ -36,9 +36,12 @@ let findEliminatedTeams teamRecords futureSchedule =
             |> List.map (fun team -> team.LcsTeam)
 
         match tiedPotentialContenders with
-        | [] -> minWins - 1
-        | [_] -> minWins
+        | [] -> minWins
+        | [_] -> minWins + 1
         | _ -> minWins + tiedPotentialContenders.Length - 1
 
+    // To be eliminated from playoffs a team needs to not be able to win enough games to enter the top 6 
+    // assuming they win every game, and any challenger loses all their remaining games
+    // teamWins + remainingGames < 7thWins
     teamRecords
     |> List.filter (fun team -> team.WinLoss.Wins + remainingGames < minimunRequiredWins)
