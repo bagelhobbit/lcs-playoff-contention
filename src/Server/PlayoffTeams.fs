@@ -35,26 +35,25 @@ let findPlayoffByes teamRecords =
         let currentGames = List.head teamRecords |> ( fun x -> x.WinLoss.Wins + x.WinLoss.Losses )
         Constants.totalLcsGames - currentGames
 
-    if remainingGames = 0
-    then
-        teamRecords
-        |> List.sortByDescending ( fun team -> team.WinLoss.Wins )
-        |> List.take 2
-    else
-        let minimunRequiredWins =
-            let minWins =
-                teamRecords
-                |> List.maxBy ( fun team -> team.WinLoss.Wins )
-                |> ( fun team -> team.WinLoss.Wins )
+    let minimunRequiredWins =
+        let minWins =
+            teamRecords
+            |> List.sortByDescending ( fun team -> team.WinLoss.Wins )
+            |> List.item 2 // 3rd place
+            |> fun team -> team.WinLoss.Wins
 
-            let tiedPotentialContenders =
-                teamRecords
-                |> List.filter ( fun team -> team.WinLoss.Wins = minWins )
+        let tiedPotentialContenders =
+            teamRecords
+            |> List.filter ( fun team -> team.WinLoss.Wins = minWins )
 
-            match tiedPotentialContenders with
-            | [] -> minWins
-            | [_] -> minWins + 1
-            | _ -> minWins + tiedPotentialContenders.Length - 1
+        match tiedPotentialContenders with
+        | [] -> minWins
+        | [_] -> minWins + 1
+        | _ -> minWins + tiedPotentialContenders.Length - 1
 
-        teamRecords
-        |> List.filter ( fun team -> team.WinLoss.Wins + ( team.WinLoss.Wins - minimunRequiredWins ) > ( minimunRequiredWins + remainingGames ) )
+    // To secure a playoff bye a team needs to have enough wins to not get knocked out of the top 2
+    // assuming they never win another game, and any challenger wins all their remaining games
+    // winsAbove3rd = teamWins - 3rdWins
+    // teamWins + winsAbove3rd > 3rdWins + remainingGames
+    teamRecords
+         |> List.filter ( fun team -> team.WinLoss.Wins + ( team.WinLoss.Wins - minimunRequiredWins ) > ( minimunRequiredWins + remainingGames ) )
