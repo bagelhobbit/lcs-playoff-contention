@@ -16,7 +16,7 @@ let findPlayoffTeams teamRecords =
 
         let tiedPotentialContenders =
             teamRecords
-            |> List.filter ( fun team -> team.WinLoss.Wins = minWins )
+            |> List.filter ( fun team -> team.WinLoss.Wins = (minWins - 1) )
 
         match tiedPotentialContenders with
         | [] -> minWins
@@ -44,7 +44,7 @@ let findPlayoffByes teamRecords =
 
         let tiedPotentialContenders =
             teamRecords
-            |> List.filter ( fun team -> team.WinLoss.Wins = minWins )
+            |> List.filter ( fun team -> team.WinLoss.Wins = (minWins - 1) )
 
         match tiedPotentialContenders with
         | [] -> minWins
