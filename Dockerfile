@@ -1,5 +1,7 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2
-COPY /deploy /
-WORKDIR /Server
-EXPOSE 8085
-ENTRYPOINT [ "dotnet", "Server.dll" ]
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2
+COPY /deploy /app
+COPY /public /app/public
+COPY /templates /app/templates
+WORKDIR /app
+EXPOSE 8080
+ENTRYPOINT [ "dotnet", "PlayoffContentionWeb.dll" ]
