@@ -1,0 +1,28 @@
+<div class="tile is-vertical is-ancestor">
+    {% for playoffStatus in model %}
+    {% if playoffStatus.Status == "Bye" %}
+    <div class="tile has-background-white-ter team-bye is-parent">
+    {% elsif playoffStatus.Status == "Clinched" %}
+    <div class="tile has-background-white-ter team-clinched is-parent">
+    {% elsif playoffStatus.Status == "Eliminated" %}
+    <div class="tile has-background-white-ter team-eliminated is-parent">
+    {% else %}
+    <div class="tile has-background-white-ter team is-parent">
+    {% endif %}
+        <div class="tile is-child"><a href="/matchups/{{playoffStatus.Team.LcsTeam}}" style="cursor: pointer;">
+                <h4 class="title is-4">{{playoffStatus.Team.LcsTeam}}</h4>
+                <h6 class="title is-6">{{playoffStatus.Team.WinLoss.Wins}}-{{playoffStatus.Team.WinLoss.Losses}}</h6>
+            </a></div>
+        {% for result in playoffStatus.Team.Results %}
+        <div class="tile is-child">
+            <h6 class="title is-6">{{result.Opponent}}</h6>
+            {% if result.Won %}
+            <h6 class="title has-text-success is-6">Win</h6>
+            {% else %}
+            <h6 class="title has-text-danger is-6">Loss</h6>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
