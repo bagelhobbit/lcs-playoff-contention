@@ -393,5 +393,5 @@ paket-files/
 .ionide/
 packages
 .paket/
-release.cmd
+release.ps1
 deploy/

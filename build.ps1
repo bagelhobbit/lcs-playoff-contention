@@ -1,9 +1,8 @@
-@echo off
-cls
+Clear-Host
 
 dotnet clean -c Release -o ".\deploy"
-Remove-Item .\deploy -Recurse
+Remove-Item .\deploy\ -Recurse
 .\.paket\paket restore
 dotnet publish -c Release -o ".\deploy"
 
-docker build -t evanturner/playoff-contention-test .
+docker build -t evanturner/playoff-contention .
