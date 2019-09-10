@@ -59,6 +59,18 @@ module Matchups =
         |> Array.sortBy (fun result -> result.Team.Code)
         |> Array.fold combine []
 
+    let toJson matchup =
+        let matchupResult =
+            match matchup.Result with
+            | Win -> "Won"
+            | Tie -> "Tied"
+            | Loss -> "Lost"
+        
+        sprintf "{ \"team\" : \"%s\", \"result\" : \"%s\" }" matchup.Team.Name matchupResult
+
+
+
+
 [<RequireQualifiedAccess>]
 module MatchupResult =
 

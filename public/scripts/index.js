@@ -3,14 +3,15 @@ window.addEventListener("DOMContentLoaded", () => {
     .then(function(response) {
         return response.text()
     }).then( text => {
-        var target = document.getElementById('target')
+        let target = document.getElementById('target')
         target.insertAdjacentHTML('afterbegin', text)
     });
+    
     fetch('api/getPlayoffStatuses')
     .then(function(response) {
         return response.text()
     }).then( text => {
-        var target = document.getElementById('target')
+        let target = document.getElementById('target')
         target.insertAdjacentHTML('beforeend', text)
     })
 });
