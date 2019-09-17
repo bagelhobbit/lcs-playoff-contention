@@ -5,14 +5,32 @@ async function createTable() {
     let target = document.getElementById('target')
     let header = '<th></th>'
     let rows = ''
+    let teamIndex = 0
     for (let matchup of teams) {
-        console.log(matchup)
         header += '<th>' + matchup.team + '</th>'
         rows += '<tr><th>' + matchup.team + '</th>'
+        let rowIndex = 0
         for (let result of matchup.matchups) {
-            rows += '<td>' + result.result + '</td>'
+            if (rowIndex === teamIndex) {
+                rows += '<td></td>'
+            }
+            if (result.result === "Won") {
+                className = 'has-text-success'
+            }
+            else if (result.result === "Tied") {
+                className = 'has-text-info'
+            }
+            else {
+                className = 'has-text-danger'
+            }
+            rows += '<td class="' + className +' title is-6">' + result.result + '</td>'
+            rowIndex++
+        }
+        if (teamIndex === 9) {
+            rows += '<td></td>'
         }
         rows += '</tr>'
+        teamIndex++
     }
     let text = '<table>' + header + rows + '</table>'
     target.insertAdjacentHTML('afterbegin', text)

@@ -73,3 +73,15 @@
     text-decoration: underline
 }
 
+table th, table td {
+    padding: 8px;
+    text-align: center;
+}
+
+table th:not(:last-child), table td:not(:last-child) {
+    border-right: 1px solid black;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
