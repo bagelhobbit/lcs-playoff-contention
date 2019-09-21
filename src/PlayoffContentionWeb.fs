@@ -14,6 +14,7 @@ open Server
 
 type MatchupModel =
     { Team : string
+      TeamCode : string
       Matchups : Models.Matchup list }
 
 
@@ -22,6 +23,7 @@ let createMatchupModel code =
     let matchups = getMatchups team
     {
         Team = Models.LcsTeam.toString team
+        TeamCode = Models.LcsTeam.toCode team
         Matchups = matchups
     }
 
@@ -47,7 +49,7 @@ let private createMatchupJson matchups =
                 |> List.map Models.Matchups.toJson
                 |> List.fold fold ""
 
-            sprintf "{ \"team\" : \"%s\", \"matchups\" : [%s] }" matchup.Team matchups
+            sprintf "{ \"team\" : \"%s\", \"teamCode\" : \"%s\", \"matchups\" : [%s] }" matchup.Team matchup.TeamCode matchups
 
         matchups
         |> Array.sortBy ( fun m -> m.Team )
