@@ -1,5 +1,7 @@
 module Server
 
+open Microsoft.FSharp.Reflection
+
 open Models
 
 open LeagueTournamentJson
@@ -84,3 +86,17 @@ let getMatchups team : Matchup list =
 
 let getSplitTitle() : string =
     LeagueTournament.currentSplitSeason
+
+
+let createTeamMatchup code =
+    let team = LcsTeam.fromCode code
+    let matchups = getMatchups team
+    TeamMatchups.create matchups team
+
+let createAllMatchups =
+    let teams = FSharpType.GetUnionCases typeof<LcsTeam>
+    teams
+    |> Array.map ( fun case -> case.Name )
+    |> Array.sort
+    |> Array.filter ( fun name -> name <> "Unknown") //ignore unknown team
+    |> Array.map createTeamMatchup
