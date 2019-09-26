@@ -13,3 +13,7 @@ services:
   app:
     image: evanturner/playoff-contention:latest
     container_name: app
+
+  app-dev:
+    image: evanturner/playoff-contention-dev:latest
+    container_name: app-dev
