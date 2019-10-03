@@ -1,5 +1,5 @@
 Param(
-    [Switch] $IsDev
+    [Switch] $IsBeta
 )
 
 Clear-Host
@@ -9,8 +9,8 @@ Remove-Item .\deploy\ -Recurse
 .\.paket\paket restore
 dotnet publish -c Release -o ".\deploy"
 
-if ($IsDev) {
-    docker build -t evanturner/playoff-contention-dev .
+if ($IsBeta) {
+    docker build -t evanturner/playoff-contention-beta .
 } else {
     docker build -t evanturner/playoff-contention .
 }

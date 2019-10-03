@@ -14,6 +14,6 @@ services:
     image: evanturner/playoff-contention:latest
     container_name: app
 
-  app-dev:
-    image: evanturner/playoff-contention-dev:latest
-    container_name: app-dev
+  app-beta:
+    image: evanturner/playoff-contention-beta:latest
+    container_name: app-beta
