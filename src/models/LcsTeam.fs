@@ -4,12 +4,12 @@ open DotLiquid
 
 type LcsTeam =
     | C9
-    | CG
     | CLG
+    | DIG
     | FOX
     | FLY
-    | GGS
-    | OPT
+    | GG
+    | IMT
     | Thieves
     | TL
     | TSM
@@ -19,12 +19,12 @@ type LcsTeam =
         member this.ToLiquid() =
             match this with
             | C9 -> "C9" :> obj
-            | CG -> "CG" :> obj
             | CLG -> "CLG" :> obj
+            | DIG -> "DIG" :> obj
             | FOX -> "FOX" :> obj
             | FLY -> "FLY" :> obj
-            | GGS -> "GGS" :> obj
-            | OPT -> "OPT" :> obj
+            | GG -> "GG" :> obj
+            | IMT -> "IMT" :> obj
             | Thieves -> "100" :> obj
             | TL -> "TL" :> obj
             | TSM -> "TSM" :> obj
@@ -35,16 +35,16 @@ module LcsTeam =
 
     let noneValue = LcsTeam.Unknown
 
-    let lcsTeams = [C9; CG; CLG; FOX; FLY; GGS; OPT; Thieves; TL; TSM]
+    let lcsTeams = [C9; CLG; DIG; FOX; FLY; GG; IMT; Thieves; TL; TSM]
 
     let toString = function
         | C9 -> "Cloud9"
-        | CG -> "Clutch Gaming"
         | CLG -> "Counter Logic Gaming"
+        | DIG -> "Dignitas"
         | FOX -> "Echo Fox"
         | FLY -> "FlyQuest"
-        | GGS -> "Golden Guardians"
-        | OPT -> "OpTic Gaming"
+        | GG -> "Golden Guardians"
+        | IMT -> "Immortals"
         | Thieves -> "100 Thieves"
         | TL -> "Team Liquid"
         | TSM -> "TSM"
@@ -52,12 +52,12 @@ module LcsTeam =
 
     let toCode = function
         | C9 -> "C9"
-        | CG -> "CG"
         | CLG -> "CLG"
+        | DIG -> "DIG"
         | FOX -> "FOX"
         | FLY -> "FLY"
-        | GGS -> "GGS"
-        | OPT -> "OPT"
+        | GG -> "GG"
+        | IMT -> "IMT"
         | Thieves -> "100"
         | TL -> "TL"
         | TSM -> "TSM"
@@ -66,12 +66,12 @@ module LcsTeam =
     let fromCode = function
         | "100" -> Thieves
         | "C9" -> C9
-        | "CG" -> CG
         | "CLG" -> CLG
+        | "DIG" -> DIG
         | "FOX" -> FOX
         | "FLY" -> FLY
-        | "GGS" -> GGS
-        | "OPT" -> OPT
+        | "GG" -> GG
+        | "IMT" -> IMT
         | "TL" -> TL
         | "TSM" -> TSM
         | _ -> LcsTeam.Unknown
