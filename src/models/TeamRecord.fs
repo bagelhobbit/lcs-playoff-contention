@@ -28,10 +28,14 @@ module TeamRecord =
         { Opponent = LcsTeam.fromCode opposingTeam.Code; Won = outcome }
 
     let private createWinLoss teamCode events =
-        events
-        |> Array.find (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode ) )
-        |> fun event -> event.Match.Teams |> List.find (fun team -> team.Code = teamCode)
-        |> fun team -> { Wins = team.Record.Wins ; Losses = team.Record.Losses }
+        match events with
+        | [| |] -> 
+            { Wins = 0; Losses = 0 }
+        | _ -> 
+            events
+            |> Array.find (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode ) )
+            |> fun event -> event.Match.Teams |> List.find (fun team -> team.Code = teamCode)
+            |> fun team -> { Wins = team.Record.Wins ; Losses = team.Record.Losses }
 
     let private createLcsResults teamCode events =
         events
