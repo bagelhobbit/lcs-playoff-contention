@@ -6,7 +6,7 @@ type LcsTeam =
     | C9
     | CLG
     | DIG
-    | FOX
+    | EG
     | FLY
     | GG
     | IMT
@@ -21,7 +21,7 @@ type LcsTeam =
             | C9 -> "C9" :> obj
             | CLG -> "CLG" :> obj
             | DIG -> "DIG" :> obj
-            | FOX -> "FOX" :> obj
+            | EG -> "EG" :> obj
             | FLY -> "FLY" :> obj
             | GG -> "GG" :> obj
             | IMT -> "IMT" :> obj
@@ -35,13 +35,13 @@ module LcsTeam =
 
     let noneValue = LcsTeam.Unknown
 
-    let lcsTeams = [C9; CLG; DIG; FOX; FLY; GG; IMT; Thieves; TL; TSM]
+    let lcsTeams = [C9; CLG; DIG; EG; FLY; GG; IMT; Thieves; TL; TSM]
 
     let toString = function
         | C9 -> "Cloud9"
         | CLG -> "Counter Logic Gaming"
         | DIG -> "Dignitas"
-        | FOX -> "Echo Fox"
+        | EG -> "Evil Geniuses"
         | FLY -> "FlyQuest"
         | GG -> "Golden Guardians"
         | IMT -> "Immortals"
@@ -54,7 +54,7 @@ module LcsTeam =
         | C9 -> "C9"
         | CLG -> "CLG"
         | DIG -> "DIG"
-        | FOX -> "FOX"
+        | EG -> "EG"
         | FLY -> "FLY"
         | GG -> "GG"
         | IMT -> "IMT"
@@ -68,7 +68,7 @@ module LcsTeam =
         | "C9" -> C9
         | "CLG" -> CLG
         | "DIG" -> DIG
-        | "FOX" -> FOX
+        | "EG" -> EG
         | "FLY" -> FLY
         | "GG" -> GG
         | "IMT" -> IMT
