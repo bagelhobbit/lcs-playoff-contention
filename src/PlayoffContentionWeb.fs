@@ -16,8 +16,8 @@ let app =
     choose 
       [
           GET >=> path "/" >=> Files.sendFile "./public/html/index.html" true
-          GET >=> path "/api/getSplitHeader" >=> page "splitHeader.liquid" ((getSplitTitle()))
-          GET >=> path "/api/getPlayoffStatuses" >=> page "teamRecords.liquid" (getPlayoffStatuses())
+          GET >=> pathScan "/api/getSplitHeader/%d" (getSplitTitle >> page "splitHeader.liquid")
+          GET >=> pathScan "/api/getPlayoffStatuses/%d" (getPlayoffStatuses >> page "teamRecords.liquid")
           GET >=> path "/api/matchups" >=> OK(Models.TeamMatchups.toJson <| createAllMatchups)
           GET >=> path "/matchups" >=> page "allMatchups.liquid" createAllMatchups
           GET >=> pathScan "/matchups/%s" (createTeamMatchup >> page "teamMatchup.liquid")

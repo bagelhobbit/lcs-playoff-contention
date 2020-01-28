@@ -39,7 +39,7 @@ let getCurrentRecords() : TeamRecord list =
 
     currentRecords 
 
-let getPlayoffStatuses() : PlayoffStatus list =
+let getPlayoffStatuses (_:int) : PlayoffStatus list =
     let teamRecords = getCurrentRecords()
 
     let remainingSchedule =
@@ -84,7 +84,7 @@ let getMatchups team : Matchup list =
     |> List.sortBy (fun matchup -> matchup.Team)
     |> List.sortBy (fun matchup -> matchup.Result)
 
-let getSplitTitle() : string =
+let getSplitTitle (_:int) : string =
     LeagueTournament.currentSplitSeason
 
 
