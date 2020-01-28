@@ -24,7 +24,7 @@ module LeagueTournament =
 
     let currentSplitSeason =
         let currentSeason =
-            if mostRecentTournament.Slug.EndsWith("spring")
+            if mostRecentTournament.Slug.EndsWith("spring") || mostRecentTournament.Slug.EndsWith("split1")
             then "Spring"
             else "Summer"
         
