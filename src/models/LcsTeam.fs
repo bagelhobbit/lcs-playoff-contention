@@ -74,4 +74,5 @@ module LcsTeam =
         | "IMT" -> IMT
         | "TL" -> TL
         | "TSM" -> TSM
+        | "Thieves" -> Thieves
         | _ -> LcsTeam.Unknown

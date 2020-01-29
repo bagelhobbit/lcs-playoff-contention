@@ -10,6 +10,7 @@
     <Compile Include="src/models/LeagueEvent.fs" />
     <Compile Include="src/models/TeamRecord.fs" />
     <Compile Include="src/models/Matchup.fs" />
+    <Compile Include="src/models/TeamMatchup.fs" />
     <Compile Include="src/models/Constants.fs" />
     <Compile Include="src/models/PlayoffStatus.fs" />
     <Compile Include="src/LeagueTournamentJson.fs" />
