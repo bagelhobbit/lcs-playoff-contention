@@ -10,16 +10,16 @@
     <div class="tile has-background-white-ter team is-parent">
     {% endif %}
         <div class="tile is-child"><a href="/matchups/{{playoffStatus.Team.LcsTeam}}" style="cursor: pointer;">
-                <h4 class="title is-4">{{playoffStatus.Team.LcsTeam}}</h4>
-                <h6 class="title is-6">{{playoffStatus.Team.WinLoss.Wins}}-{{playoffStatus.Team.WinLoss.Losses}}</h6>
+                <div class="title is-4">{{playoffStatus.Team.LcsTeam}}</div>
+                <div class="title is-6">{{playoffStatus.Team.WinLoss.Wins}}-{{playoffStatus.Team.WinLoss.Losses}}</div>
             </a></div>
         {% for result in playoffStatus.Team.Results %}
         <div class="tile is-child">
-            <h6 class="title is-6">{{result.Opponent}}</h6>
+            <div class="title is-6">{{result.Opponent}}</div>
             {% if result.Won %}
-            <h6 class="title has-text-success is-6">Win</h6>
+            <div class="title has-text-success is-6">Win</div>
             {% else %}
-            <h6 class="title has-text-danger is-6">Loss</h6>
+            <div class="title has-text-danger is-6">Loss</div>
             {% endif %}
         </div>
         {% endfor %}
