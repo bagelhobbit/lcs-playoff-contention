@@ -1,5 +1,5 @@
 async function createTable() {
-    let response = await fetch('api/matchups');
+    let response = await fetch('api/matchups/matchups');
     let teams = await response.json();
 
     let target = document.getElementById('target')
@@ -13,7 +13,7 @@ async function createTable() {
         let rowIndex = 0
         for (let i = 0; i < teams.length - 1; i++) {
             if (rowIndex === teamIndex) {
-                rows += '<td></td>'
+                rows += '<td>X</td>'
             }
             if (matchup.matchups[i] !== undefined) {
                 if (matchup.matchups[i].result === "Won") {
@@ -22,8 +22,11 @@ async function createTable() {
                 else if (matchup.matchups[i].result === "Tied") {
                     className = 'has-text-info'
                 }
-                else {
+                else if (matchup.matchups[i].result === "Lost"){
                     className = 'has-text-danger'
+                }
+                else {
+                    className = ""
                 }
 
                 rows += '<td class="' + className + ' title is-6">' + matchup.matchups[i].result + '</td>'
@@ -36,7 +39,7 @@ async function createTable() {
         }
 
         if (teamIndex === 9) {
-            rows += '<td></td>'
+            rows += '<td>X</td>'
         }
 
         rows += '</tr>'

@@ -16,9 +16,9 @@ let app =
     choose 
       [
           GET >=> path "/" >=> Files.sendFile "./public/html/index.html" true
-          GET >=> pathScan "/api/getSplitHeader/%d" (getSplitTitle >> page "splitHeader.liquid")
-          GET >=> pathScan "/api/getPlayoffStatuses/%d" (getPlayoffStatuses >> page "teamRecords.liquid")
-          GET >=> path "/api/matchups" >=> OK(Models.TeamMatchups.toJson <| createAllMatchups)
+          GET >=> pathScan "/api/getSplitHeader/%s" (getSplitTitle >> page "splitHeader.liquid")
+          GET >=> pathScan "/api/getPlayoffStatuses/%s" (getPlayoffStatuses >> page "teamRecords.liquid")
+          GET >=> pathScan "/api/matchups/%s" (createAllMatchups >> Models.TeamMatchups.toJson >> OK)
           GET >=> path "/matchups" >=> page "allMatchups.liquid" createAllMatchups
           GET >=> pathScan "/matchups/%s" (createTeamMatchup >> page "teamMatchup.liquid")
           GET >=> Files.browseHome
