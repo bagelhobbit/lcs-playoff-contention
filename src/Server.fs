@@ -105,7 +105,7 @@ let createAllMatchups (_:string) =
     let emptyMatchups =
         filteredTeams
         |> Array.map ( fun team -> { 
-            Team = { Code = (LcsTeam.fromCode team |> LcsTeam.toCode); Name = team; 
+            Team = { Code = (LcsTeam.fromCode team |> LcsTeam.toCode); Name = (LcsTeam.fromCode team |> LcsTeam.toString); 
                      Result = { Outcome = ""; GameWins = 0 }; Record = { Wins = 0; Losses = 0 } }
             Result = NA } )
 
