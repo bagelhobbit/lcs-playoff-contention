@@ -1,5 +1,7 @@
 module Server
 
+open Microsoft.FSharp.Reflection
+
 open Models
 
 open LeagueTournamentJson
@@ -27,6 +29,7 @@ let getCurrentRecords() : TeamRecord list =
             | Win -> -1
             | Tie -> 0
             | Loss -> 1
+            | NA -> 1
         else 0
 
     let currentRecords =
@@ -37,7 +40,7 @@ let getCurrentRecords() : TeamRecord list =
 
     currentRecords 
 
-let getPlayoffStatuses() : PlayoffStatus list =
+let getPlayoffStatuses (_:string) : PlayoffStatus list =
     let teamRecords = getCurrentRecords()
 
     let remainingSchedule =
@@ -82,5 +85,44 @@ let getMatchups team : Matchup list =
     |> List.sortBy (fun matchup -> matchup.Team)
     |> List.sortBy (fun matchup -> matchup.Result)
 
-let getSplitTitle() : string =
+let getSplitTitle (_:string) : string =
     LeagueTournament.currentSplitSeason
+
+let createTeamMatchup code =
+    let team = LcsTeam.fromCode code
+    let matchups = getMatchups team
+    TeamMatchups.create matchups team
+
+let createAllMatchups (_:string) =
+    let teams = FSharpType.GetUnionCases typeof<LcsTeam>
+    
+    let filteredTeams =
+        teams
+        |> Array.map ( fun case -> case.Name )
+        |> Array.sort
+        |> Array.filter ( fun name -> name <> "Unknown") // Ignore unknown team
+
+    let emptyMatchups =
+        filteredTeams
+        |> Array.map ( fun team -> { 
+            Team = { Code = (LcsTeam.fromCode team |> LcsTeam.toCode); Name = (LcsTeam.fromCode team |> LcsTeam.toString); 
+                     Result = { Outcome = ""; GameWins = 0 }; Record = { Wins = 0; Losses = 0 } }
+            Result = NA } )
+
+    let matchups =
+        filteredTeams
+        |> Array.map createTeamMatchup
+
+    let filledMatchups =
+        matchups
+        |> Array.map ( fun matchup ->
+            let updated = 
+                Array.fold ( fun (acc : Matchup list) (elem : Matchup) ->
+                    let alreadyContains = acc |> List.exists (fun item -> item.Team.Code = elem.Team.Code)
+                    if alreadyContains then acc
+                    else elem::acc
+                    ) matchup.Matchups emptyMatchups 
+
+            { matchup with Matchups = updated } )
+
+    filledMatchups
