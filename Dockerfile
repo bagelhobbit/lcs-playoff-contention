@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1
 COPY /deploy /app
 COPY /public /app/public
 COPY /templates /app/templates
