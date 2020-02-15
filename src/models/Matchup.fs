@@ -3,7 +3,7 @@ namespace Models
 open DotLiquid
 
 type MatchupResult = 
-    Win | Tie | Loss
+    Win | Tie | Loss | NA
 
     interface ILiquidizable with
         member this.ToLiquid() =
@@ -11,6 +11,7 @@ type MatchupResult =
             | Win -> "Win" :> obj
             | Tie -> "Tie" :> obj
             | Loss -> "Loss" :> obj
+            | NA -> "-" :> obj
 
 type Matchup = { Team: Team; Result: MatchupResult }
 
@@ -51,6 +52,8 @@ module Matchups =
                 | (Tie, Win) ->  { Team=x.Team; Result=Win }::xs
                 | (Tie, Loss) ->  { Team=x.Team; Result=Loss }::xs
                 | (Tie, Tie) ->  { Team=x.Team; Result=Tie }::xs
+                | (NA, result) -> { Team=x.Team; Result=result }::xs
+                | (_, NA) -> { Team=x.Team; Result=NA }::xs
             | xs -> matchup::xs
 
         pastEvents
@@ -65,6 +68,7 @@ module Matchups =
             | Win -> "Won"
             | Tie -> "Tied"
             | Loss -> "Lost"
+            | NA -> "-"
         
         sprintf "{ \"team\" : \"%s\", \"result\" : \"%s\" }" matchup.Team.Name matchupResult
 
