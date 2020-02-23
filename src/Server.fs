@@ -126,3 +126,33 @@ let createAllMatchups (_:string) =
             { matchup with Matchups = updated } )
 
     filledMatchups
+
+let findCycles (_:string) =
+    let matchups = createAllMatchups "" |> List.ofArray
+
+    let onlyWins =
+        matchups
+        |> List.map (fun matchup ->
+            let wins = matchup.Matchups |> List.filter (fun m -> m.Result = Win)
+            { matchup with Matchups = wins } )
+
+    let getNextNode teamMatchup visited =
+        let firstMatchup = teamMatchup.Matchups |> List.head
+        let node = onlyWins |> List.find (fun matchup -> matchup.TeamCode = firstMatchup.Team.Code)
+        match visited |> List.contains node with
+        | true -> None
+        | false -> Some node
+
+    let rec cycles teamMatchup visited =
+        let nextNode = getNextNode teamMatchup visited
+        match nextNode with
+        | Some node -> cycles node (node::visited)
+        | None -> visited |> List.map (fun matchup -> matchup.TeamCode)
+
+    let allCycles =
+        onlyWins
+        |> List.map (fun matchup -> cycles matchup [])
+        |> List.distinct
+
+    // Convert to JSON by replacing ';' with ','
+    sprintf "%A" allCycles |> String.replace ";" ","

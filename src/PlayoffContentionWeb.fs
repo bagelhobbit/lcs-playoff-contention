@@ -19,6 +19,7 @@ let app =
           GET >=> pathScan "/api/getSplitHeader/%s" (getSplitTitle >> page "splitHeader.liquid")
           GET >=> pathScan "/api/getPlayoffStatuses/%s" (getPlayoffStatuses >> page "teamRecords.liquid")
           GET >=> pathScan "/api/matchups/%s" (createAllMatchups >> Models.TeamMatchups.toJson >> OK)
+          GET >=> pathScan "/api/cycles/%s" (findCycles >> OK)
           GET >=> path "/matchups" >=> page "allMatchups.liquid" createAllMatchups
           GET >=> pathScan "/matchups/%s" (createTeamMatchup >> page "teamMatchup.liquid")
           GET >=> Files.browseHome
