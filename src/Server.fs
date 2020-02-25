@@ -136,23 +136,55 @@ let findCycles (_:string) =
             let wins = matchup.Matchups |> List.filter (fun m -> m.Result = Win)
             { matchup with Matchups = wins } )
 
-    let getNextNode teamMatchup visited =
-        let firstMatchup = teamMatchup.Matchups |> List.head
-        let node = onlyWins |> List.find (fun matchup -> matchup.TeamCode = firstMatchup.Team.Code)
+    let getNextNode visited (matchup:Matchup)  =
+        let node = onlyWins |> List.find (fun m -> m.TeamCode = matchup.Team.Code)
         match visited |> List.contains node with
         | true -> None
         | false -> Some node
 
-    let rec cycles teamMatchup visited =
-        let nextNode = getNextNode teamMatchup visited
-        match nextNode with
-        | Some node -> cycles node (node::visited)
-        | None -> visited |> List.map (fun matchup -> matchup.TeamCode)
+    let findCycle teamMatchups visited =
+        let nextNodes list visited =
+            list
+            |> List.map (getNextNode visited)
 
-    let allCycles =
-        onlyWins
-        |> List.map (fun matchup -> cycles matchup [])
-        |> List.distinct
+        let hasCycles (list: 'a option list) =
+            list
+            |> List.exists (fun opt -> opt.IsSome)
+            |> not
 
-    // Convert to JSON by replacing ';' with ','
-    sprintf "%A" allCycles |> String.replace ";" ","
+        let rec cycles matchups visited = 
+            let nodes = nextNodes matchups visited
+            let isCycle = hasCycles nodes
+            match isCycle with
+            | true ->
+                let check = 
+                    let wins = visited.Head.Matchups
+                    let last = visited |> List.last
+                    wins |> List.exists (fun m -> m.Team.Code = last.TeamCode)
+                if not check
+                then ""
+                else
+                    let start = visited.Head.TeamCode
+                    visited
+                    |> List.rev
+                    |> List.fold ( fun state m -> state + " beat " + m.TeamCode ) start
+            | false ->
+                let nextLevel =
+                    nodes
+                    |> List.filter (fun opt -> opt.IsSome)
+                    |> List.map Option.get
+ 
+                nextLevel
+                |> List.map (fun matchup -> cycles matchup.Matchups (matchup::visited))
+                |> List.fold (fun state s -> 
+                    if state = ""
+                    then s
+                    else
+                        state + ", " + s) ""
+
+        teamMatchups
+        |> List.map (fun matchup -> cycles matchup.Matchups (matchup::visited))
+
+    let x = findCycle onlyWins []
+
+    sprintf "%A" x
