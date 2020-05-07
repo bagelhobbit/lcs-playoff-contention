@@ -56,18 +56,13 @@ let getPlayoffStatuses (_:string) : PlayoffStatus list =
         findPlayoffTeams teamRecords
         |> List.map (fun team -> team.LcsTeam)
 
-    let playoffByes =
-        findPlayoffByes teamRecords
-        |> List.map (fun team -> team.LcsTeam)
-
     let assignPlayoffStatus team =
         let containsTeam =
-            [ eliminatedTeams; playoffTeams; playoffByes ]
+            [ eliminatedTeams; playoffTeams]
             |> List.map (List.contains team.LcsTeam)
 
         match containsTeam with
-        | _::_::[x] when x -> { Status = Bye; Team = team }
-        | _::x::_ when x -> { Status = Clinched; Team = team }
+        | _::[x] when x -> { Status = Clinched; Team = team }
         | x::_ when x -> { Status = Eliminated; Team = team }
         | _ -> { Status = Unknown; Team = team }
 

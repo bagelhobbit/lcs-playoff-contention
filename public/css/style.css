@@ -1,7 +1,6 @@
 /* This should be generated from src/client/style.sass */
 .legend-eliminated::before,
-.legend-clinched::before,
-.legend-bye::before {
+.legend-clinched::before {
     content: "";
     display: inline-block;
     height: 16px;
@@ -12,34 +11,26 @@
 
 .team-eliminated,
 .team-clinched,
-.team-bye,
 .team {
     border-radius: 4px
 }
 
 .team-eliminated:not(:last-child),
 .team-clinched:not(:last-child),
-.team-bye:not(:last-child),
 .team:not(:last-child) {
     margin-bottom: 1.5rem
 }
 
 .team-eliminated:first-child,
 .team-clinched:first-child,
-.team-bye:first-child,
 .team:first-child {
     margin-top: 1.5rem
 }
 
 .team-eliminated,
-.team-clinched,
-.team-bye {
+.team-clinched {
     border-left-style: solid;
     border-left-width: thick
-}
-
-.team-bye {
-    border-left-color: #23d160
 }
 
 .team-clinched {
@@ -50,15 +41,10 @@
     border-left-color: #ff3860
 }
 
-.legend-bye,
 .legend-clinched,
 .legend-eliminated {
     display: inline-block;
     line-height: 1.5
-}
-
-.legend-bye::before {
-    background-color: #23d160
 }
 
 .legend-clinched::before {

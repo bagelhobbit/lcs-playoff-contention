@@ -1,8 +1,6 @@
 <div class="tile is-vertical is-ancestor">
     {% for playoffStatus in model %}
-    {% if playoffStatus.Status == "Bye" %}
-    <div class="tile has-background-white-ter team-bye is-parent">
-    {% elsif playoffStatus.Status == "Clinched" %}
+    {% if playoffStatus.Status == "Clinched" %}
     <div class="tile has-background-white-ter team-clinched is-parent">
     {% elsif playoffStatus.Status == "Eliminated" %}
     <div class="tile has-background-white-ter team-eliminated is-parent">
