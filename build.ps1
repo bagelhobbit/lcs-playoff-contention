@@ -6,7 +6,7 @@ Clear-Host
 
 dotnet clean -c Release -o ".\deploy"
 Remove-Item .\deploy\ -Recurse
-.\.paket\paket restore
+dotnet paket restore
 dotnet publish -c Release -o ".\deploy"
 
 if ($IsBeta) {
