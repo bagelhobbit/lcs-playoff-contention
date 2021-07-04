@@ -10,7 +10,9 @@ open EliminatedTeams
 open PlayoffTeams
 
 
-let getCurrentRecords() : TeamRecord list =
+type RecordSort = Cumulative | Split 
+
+let getCurrentRecords sortType : TeamRecord list =
     let lcsTeams = LcsTeam.lcsTeams
 
     let lcsResults = 
@@ -32,16 +34,29 @@ let getCurrentRecords() : TeamRecord list =
             | NA -> 1
         else 0
 
+    let getSortableWins record =
+        match sortType with
+        | Cumulative -> record.WinLoss.Wins
+        | Split -> record.SplitWinLoss.Wins
+
     let currentRecords =
         lcsTeams
         |> List.map (TeamRecord.create lcsResults)
-        |> List.sortByDescending (fun record -> record.WinLoss.Wins)
+        |> List.sortByDescending getSortableWins
         |> List.sortWith descendingComparer
 
     currentRecords 
 
-let getPlayoffStatuses (_:string) : PlayoffStatus list =
-    let teamRecords = getCurrentRecords()
+let getPlayoffStatuses sort : PlayoffStatus list =
+
+    let sortType =
+        match sort with
+        | "split" -> Split
+        | "cumulative" -> Cumulative
+        | "all" -> Cumulative 
+        | _ -> Cumulative
+
+    let teamRecords = getCurrentRecords sortType
 
     let remainingSchedule =
         LeagueSchedule.getSchedule()
