@@ -16,10 +16,12 @@ docker-compose up -d
 
 ## Build the application
 
+First install [paket][1] using .NET Core
+
 To build run the following commands:
 
 ```bash
-.\.paket\paket restore
+dotnet paket restore
 dotnet build
 ```
 
@@ -50,3 +52,5 @@ or
 ```bash
 .\release.cmd
 ```
+
+[1]: https://fsprojects.github.io/Paket/index.html
