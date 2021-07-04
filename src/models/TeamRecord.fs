@@ -6,6 +6,7 @@ type LcsResult = { Opponent: LcsTeam; Won: bool }
 type TeamRecord = 
     { LcsTeam: LcsTeam
       WinLoss: WinLoss
+      SplitWinLoss: WinLoss
       Results: LcsResult list }
 
 [<RequireQualifiedAccess>]
@@ -51,9 +52,17 @@ module TeamRecord =
         |> Array.map (createLcsResult teamCode)
         |> Array.toList
 
+    let private createSplitWinLoss teamCode events =
+        events
+        |> Array.filter (isTeamInGame teamCode)
+        |> Array.map (createLcsResult teamCode)
+        |> Array.partition (fun (result) -> result.Won)
+        |> fun (wins, lossess) -> { Wins = wins |> Array.length; Losses = lossess |> Array.length }
+
     let create events team =
         let teamCode = LcsTeam.toCode team
 
         { LcsTeam = team
           WinLoss = createWinLoss teamCode events
+          SplitWinLoss = createSplitWinLoss teamCode events
           Results = createLcsResults teamCode events }

@@ -9,7 +9,11 @@
     {% endif %}
         <div class="tile is-child"><a href="/matchups/{{playoffStatus.Team.LcsTeam}}" style="cursor: pointer;">
                 <div class="title is-4">{{playoffStatus.Team.LcsTeam}}</div>
+                {% if playoffStatus.Team.WinLoss.Wins == playoffStatus.Team.SplitWinLoss.Wins && playoffStatus.Team.WinLoss.Losses == playoffStatus.Team.SplitWinLoss.Losses %}          
                 <div class="title is-6">{{playoffStatus.Team.WinLoss.Wins}}-{{playoffStatus.Team.WinLoss.Losses}}</div>
+                {% else %}
+                <div class="title is-6">{{playoffStatus.Team.WinLoss.Wins}}-{{playoffStatus.Team.WinLoss.Losses}} ({{playoffStatus.Team.SplitWinLoss.Wins}}-{{playoffStatus.Team.SplitWinLoss.Losses}})</div>
+                {% endif %}
             </a></div>
         {% for result in playoffStatus.Team.Results %}
         <div class="tile is-child">
