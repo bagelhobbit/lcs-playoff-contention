@@ -10,7 +10,7 @@ dotnet paket restore
 dotnet publish -c Release -o ".\deploy"
 
 if ($IsBeta) {
-    docker build -t evanturner/playoff-contention-beta .
+    docker build -t emmakturner/playoff-contention-beta .
 } else {
-    docker build -t evanturner/playoff-contention .
+    docker build -t emmakturner/playoff-contention .
 }

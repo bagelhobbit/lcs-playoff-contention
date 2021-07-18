@@ -11,9 +11,9 @@ services:
       - 443:443
 
   app:
-    image: evanturner/playoff-contention:latest
+    image: emmakturner/playoff-contention:latest
     container_name: app
 
   app-beta:
-    image: evanturner/playoff-contention-beta:latest
+    image: emmakturner/playoff-contention-beta:latest
     container_name: app-beta
