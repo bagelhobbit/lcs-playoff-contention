@@ -2,9 +2,9 @@ namespace Models
 
 
 type WinLoss = { Wins: int; Losses: int }
-type LcsResult = { Opponent: LcsTeam; Won: bool }
+type LcsResult = { Opponent: LolTeam; Won: bool }
 type TeamRecord = 
-    { LcsTeam: LcsTeam
+    { LcsTeam: LolTeam
       WinLoss: WinLoss
       SplitWinLoss: WinLoss
       Results: LcsResult list }
@@ -26,7 +26,7 @@ module TeamRecord =
             | "loss" -> true
             | _ -> true
         
-        { Opponent = LcsTeam.fromCode opposingTeam.Code; Won = outcome }
+        { Opponent = { Name = opposingTeam.Name; Code = opposingTeam.Code; Image = "" }; Won = outcome }
 
     let private createWinLoss teamCode events =
         let findTeamInEvent = function
@@ -60,9 +60,7 @@ module TeamRecord =
         |> fun (wins, lossess) -> { Wins = wins |> Array.length; Losses = lossess |> Array.length }
 
     let create events team =
-        let teamCode = LcsTeam.toCode team
-
         { LcsTeam = team
-          WinLoss = createWinLoss teamCode events
-          SplitWinLoss = createSplitWinLoss teamCode events
-          Results = createLcsResults teamCode events }
+          WinLoss = createWinLoss team.Code events
+          SplitWinLoss = createSplitWinLoss team.Code events
+          Results = createLcsResults team.Code events }

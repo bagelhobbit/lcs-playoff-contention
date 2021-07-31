@@ -6,6 +6,7 @@ open Models
 
 open LeagueTournamentJson
 open LeagueScheduleJson
+open Teams
 open EliminatedTeams
 open PlayoffTeams
 
@@ -13,7 +14,6 @@ open PlayoffTeams
 type RecordSort = Cumulative | Split 
 
 let getCurrentRecords sortType : TeamRecord list =
-    let lcsTeams = LcsTeam.lcsTeams
 
     let lcsResults = 
         LeagueSchedule.getSchedule()
@@ -40,7 +40,8 @@ let getCurrentRecords sortType : TeamRecord list =
         | Split -> record.SplitWinLoss.Wins
 
     let currentRecords =
-        lcsTeams
+        LolTeam.LcsTeams
+        |> Array.toList
         |> List.map (TeamRecord.create lcsResults)
         |> List.sortByDescending getSortableWins
         |> List.sortWith descendingComparer
@@ -92,35 +93,32 @@ let getMatchups team : Matchup list =
         |> Array.map LeagueSchedule.create
 
     Matchups.create team lcsResults
-    |> List.sortBy (fun matchup -> matchup.Team)
+    |> List.sortBy (fun matchup -> matchup.Team.Code)
     |> List.sortBy (fun matchup -> matchup.Result)
 
 let getSplitTitle (_:string) : string =
     LeagueTournament.currentSplitSeason
 
-let createTeamMatchup code =
-    let team = LcsTeam.fromCode code
+let createTeamMatchup team =
     let matchups = getMatchups team
     TeamMatchups.create matchups team
 
 let createAllMatchups (_:string) =
-    let teams = FSharpType.GetUnionCases typeof<LcsTeam>
+    let teams = LolTeam.LcsTeams
     
-    let filteredTeams =
+    let sortedTeams =
         teams
-        |> Array.map ( fun case -> case.Name )
-        |> Array.sort
-        |> Array.filter ( fun name -> name <> "Unknown") // Ignore unknown team
+        |> Array.sortBy (fun (t) -> t.Name)
 
     let emptyMatchups =
-        filteredTeams
+        sortedTeams
         |> Array.map ( fun team -> { 
-            Team = { Code = (LcsTeam.fromCode team |> LcsTeam.toCode); Name = (LcsTeam.fromCode team |> LcsTeam.toString); 
+            Team = { Code = team.Code; Name = team.Name; 
                      Result = { Outcome = ""; GameWins = 0 }; Record = { Wins = 0; Losses = 0 } }
             Result = NA } )
 
     let matchups =
-        filteredTeams
+        sortedTeams
         |> Array.map createTeamMatchup
 
     let filledMatchups =

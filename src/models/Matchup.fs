@@ -20,7 +20,7 @@ type Matchup = { Team: Team; Result: MatchupResult }
 module Matchups =
 
     let create team pastEvents =
-        let teamCode = LcsTeam.toCode team
+        let teamCode = team.Code
 
         let createMatchup event =
             let teamWon (team: Team) =
@@ -79,8 +79,8 @@ module Matchups =
 module MatchupResult =
 
     let create team1 team2 pastEvents =
-        let teamCode1 = LcsTeam.toCode team1
-        let teamCode2 = LcsTeam.toCode team2
+        let teamCode1 = team1.Code
+        let teamCode2 = team2.Code
 
         let teamWon (team: Team) =
             match team.Result.Outcome with

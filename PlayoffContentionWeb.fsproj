@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,8 +6,8 @@
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="src/models/LcsTeam.fs" />
     <Compile Include="src/models/LeagueEvent.fs" />
+    <Compile Include="src/models/LolTeam.fs" />
     <Compile Include="src/models/TeamRecord.fs" />
     <Compile Include="src/models/Matchup.fs" />
     <Compile Include="src/models/TeamMatchup.fs" />
@@ -15,6 +15,7 @@
     <Compile Include="src/models/PlayoffStatus.fs" />
     <Compile Include="src/LeagueTournamentJson.fs" />
     <Compile Include="src/LeagueScheduleJson.fs" />
+    <Compile Include="src\Teams.fs" />
     <Compile Include="src/EliminatedTeams.fs" />
     <Compile Include="src/PlayoffTeams.fs" />
     <Compile Include="src/Server.fs" />

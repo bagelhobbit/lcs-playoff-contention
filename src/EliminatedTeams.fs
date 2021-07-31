@@ -15,8 +15,8 @@ let findEliminatedTeams teamRecords futureSchedule =
             |> (fun team -> team.WinLoss.Wins)
 
         let filterFutureSchedule team1 team2 event =
-            let teamCode1 = LcsTeam.toCode team1.LcsTeam
-            let teamCode2 = LcsTeam.toCode team2.LcsTeam
+            let teamCode1 = team1.Code
+            let teamCode2 = team2.Code
 
             event.Match.Teams
             |> List.map (fun team -> team.Code)
@@ -31,7 +31,7 @@ let findEliminatedTeams teamRecords futureSchedule =
             teamRecords
             |> List.filter (fun team -> team.WinLoss.Wins = minWins)
             |> List.pairwise
-            |> List.filter (fun (team1, team2) -> Seq.exists (filterFutureSchedule team1 team2) futureSchedule)
+            |> List.filter (fun (team1, team2) -> Seq.exists (filterFutureSchedule team1.LcsTeam team2.LcsTeam) futureSchedule)
             |> unpairwise
             |> List.map (fun team -> team.LcsTeam)
 

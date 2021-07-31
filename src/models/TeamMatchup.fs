@@ -10,8 +10,8 @@ module TeamMatchups =
 
     let create matchups team =
         {
-            Team = LcsTeam.toString team
-            TeamCode = LcsTeam.toCode team
+            Team = team.Name
+            TeamCode = team.Code
             Matchups = matchups
         }
 

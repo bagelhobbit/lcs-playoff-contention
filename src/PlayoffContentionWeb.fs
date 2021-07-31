@@ -9,6 +9,7 @@ open Suave.Operators
 open Suave.RequestErrors
 open DotLiquid
 
+open Models
 open Server
 
 
@@ -18,9 +19,9 @@ let app =
           GET >=> path "/" >=> Files.sendFile "./public/html/index.html" true
           GET >=> pathScan "/api/getSplitHeader/%s" (getSplitTitle >> page "splitHeader.liquid")
           GET >=> pathScan "/api/getPlayoffStatuses/%s" (getPlayoffStatuses >> page "teamRecords.liquid")
-          GET >=> pathScan "/api/matchups/%s" (createAllMatchups >> Models.TeamMatchups.toJson >> OK)
+          GET >=> pathScan "/api/matchups/%s" (createAllMatchups >> TeamMatchups.toJson >> OK)
           GET >=> path "/matchups" >=> page "allMatchups.liquid" createAllMatchups
-          GET >=> pathScan "/matchups/%s" (createTeamMatchup >> page "teamMatchup.liquid")
+          GET >=> pathScan "/matchups/%s" ( (fun (s) -> { Name = ""; Code = s; Image = "" }) >> createTeamMatchup >> page "teamMatchup.liquid" )
           GET >=> Files.browseHome
           NOT_FOUND "Found no handlers."
       ]
