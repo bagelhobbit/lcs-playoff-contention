@@ -1,7 +1,5 @@
 module Server
 
-open Microsoft.FSharp.Reflection
-
 open Models
 
 open LeagueTournamentJson
@@ -13,10 +11,10 @@ open PlayoffTeams
 
 type RecordSort = Cumulative | Split 
 
-let getCurrentRecords sortType : TeamRecord list =
+let getCurrentRecords sortType league: TeamRecord list =
 
     let lcsResults = 
-        LeagueSchedule.getSchedule()
+        LeagueSchedule.getSchedule league
         |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
         |> Array.map LeagueSchedule.create
 
@@ -40,7 +38,7 @@ let getCurrentRecords sortType : TeamRecord list =
         | Split -> record.SplitWinLoss.Wins
 
     let currentRecords =
-        LolTeam.LcsTeams
+        LolTeam.LolTeams league
         |> Array.toList
         |> List.map (TeamRecord.create lcsResults)
         |> List.sortByDescending getSortableWins
@@ -48,7 +46,7 @@ let getCurrentRecords sortType : TeamRecord list =
 
     currentRecords 
 
-let getPlayoffStatuses sort : PlayoffStatus list =
+let getPlayoffStatuses (league, sort) : PlayoffStatus list = 
 
     let sortType =
         match sort with
@@ -57,10 +55,16 @@ let getPlayoffStatuses sort : PlayoffStatus list =
         | "all" -> Cumulative 
         | _ -> Cumulative
 
-    let teamRecords = getCurrentRecords sortType
+    let leagueType =
+        match league with
+        | "lcs" -> LCS
+        | "lec" -> LEC
+        | _ -> LCS
+
+    let teamRecords = getCurrentRecords sortType leagueType
 
     let remainingSchedule =
-        LeagueSchedule.getSchedule()
+        LeagueSchedule.getSchedule leagueType
         |> Array.filter (fun event -> event.State = LeagueSchedule.StateUnstarted)
         |> Array.map LeagueSchedule.create
 
@@ -85,10 +89,9 @@ let getPlayoffStatuses sort : PlayoffStatus list =
     teamRecords
     |> List.map assignPlayoffStatus
 
-
 let getMatchups team : Matchup list =
     let lcsResults = 
-        LeagueSchedule.getSchedule()
+        LeagueSchedule.getSchedule LCS
         |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
         |> Array.map LeagueSchedule.create
 
@@ -103,8 +106,18 @@ let createTeamMatchup team =
     let matchups = getMatchups team
     TeamMatchups.create matchups team
 
-let createAllMatchups (_:string) =
-    let teams = LolTeam.LcsTeams
+let createTeamMatchupByCode teamCode =
+    let team = { Name = ""; Code = teamCode; Image = "" }
+    createTeamMatchup team
+
+let createAllMatchups league =
+    let leagueType =
+        match league with
+        | "lcs" -> LCS
+        | "lec" -> LEC
+        | _ -> LCS
+
+    let teams = LolTeam.LolTeams leagueType
     
     let sortedTeams =
         teams

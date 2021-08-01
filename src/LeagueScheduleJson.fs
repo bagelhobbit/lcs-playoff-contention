@@ -4,9 +4,12 @@ open FSharp.Data
 
 open Models
 open LeagueTournamentJson
+open System
 
 
 type LeagueSchedule = JsonProvider<"src/json/schedule.json", SampleIsList=true>
+
+type League = LCS | LEC | LPL | LCK
 
 
 [<RequireQualifiedAccess>]
@@ -18,6 +21,12 @@ module LeagueSchedule =
 
     [<Literal>]
     let StateUnstarted = "unstarted"
+
+    let mutable private _lastLeague = LCS
+
+    let mutable private _lastUpdated = DateTime.MinValue
+
+    let mutable private _schedule = None
 
     // Fable can't use the type provider,
     // so we need to use actual types
@@ -52,12 +61,19 @@ module LeagueSchedule =
                 { Type = event.Match.Strategy.Type
                   Count = event.Match.Strategy.Count } } }
 
-    let private getScheduleJson pageToken =
-        let naLeagueId = "98767991299243165"
+    let private getScheduleJson league pageToken =
+        let lcsLeagueId = "98767991299243165"
+        let lecLeagueId = "98767991302996019"
+
+        let leagueId = 
+            match league with
+            | LEC -> lecLeagueId
+            | _ -> lcsLeagueId
+
         let apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
 
         let query = 
-            let baseQuery = ["hl", "en-US"; "leagueId", naLeagueId]
+            let baseQuery = ["hl", "en-US"; "leagueId", leagueId]
 
             match pageToken with
             | Some token -> baseQuery @ ["pageToken", token]
@@ -67,10 +83,29 @@ module LeagueSchedule =
             query = query,
             headers = [ "x-api-key", apiKey] )
 
-    let getSchedule () =
-        let schedule =
-            let scheduleJson = getScheduleJson None
-            LeagueSchedule.Parse(scheduleJson).Data.Schedule
+    let getSchedule league =
+        let schedule = 
+            match _schedule with
+            | None ->
+                let schedule = 
+                    let scheduleJson = getScheduleJson league None
+                    LeagueSchedule.Parse(scheduleJson).Data.Schedule 
+                _schedule <- Some schedule
+                _lastLeague <- league
+                _lastUpdated <- DateTime.Now
+                schedule
+            | Some schedule ->
+                if (DateTime.Now - _lastUpdated).Minutes > 5 || _lastLeague <> league 
+                then
+                    let schedule = 
+                        let scheduleJson = getScheduleJson league None
+                        LeagueSchedule.Parse(scheduleJson).Data.Schedule 
+                    _schedule <- Some schedule
+                    _lastLeague <- league
+                    _lastUpdated <- DateTime.Now
+                    schedule
+                else 
+                    schedule
 
         let regularSeasonFilter (event: LeagueSchedule.Event) =
             event.StartTime.Date >= LeagueTournament.mostRecentTournament.StartDate.Date &&
@@ -97,7 +132,7 @@ module LeagueSchedule =
                 | Some _, false -> schedule.Pages.Older
                 | None, _ -> schedule.Pages.Older
 
-            let extraEventsJson = getScheduleJson <| Some page
+            let extraEventsJson = getScheduleJson league <| Some page
 
             let extraEvents =
                 LeagueSchedule.Parse(extraEventsJson).Data.Schedule.Events
