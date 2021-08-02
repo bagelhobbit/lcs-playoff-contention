@@ -11,8 +11,13 @@ open PlayoffTeams
 
 type RecordSort = Cumulative | Split 
 
-let getCurrentRecords sortType league: TeamRecord list =
+let getLeagueType league =
+    match league with
+    | "lcs" -> LCS
+    | "lec" -> LEC
+    | _ -> LCS
 
+let getCurrentRecords sortType league: TeamRecord list =
     let lcsResults = 
         LeagueSchedule.getSchedule league
         |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
@@ -47,7 +52,6 @@ let getCurrentRecords sortType league: TeamRecord list =
     currentRecords 
 
 let getPlayoffStatuses (league, sort) : PlayoffStatus list = 
-
     let sortType =
         match sort with
         | "split" -> Split
@@ -55,11 +59,7 @@ let getPlayoffStatuses (league, sort) : PlayoffStatus list =
         | "all" -> Cumulative 
         | _ -> Cumulative
 
-    let leagueType =
-        match league with
-        | "lcs" -> LCS
-        | "lec" -> LEC
-        | _ -> LCS
+    let leagueType = getLeagueType league
 
     let teamRecords = getCurrentRecords sortType leagueType
 
@@ -99,8 +99,9 @@ let getMatchups team : Matchup list =
     |> List.sortBy (fun matchup -> matchup.Team.Code)
     |> List.sortBy (fun matchup -> matchup.Result)
 
-let getSplitTitle (_:string) : string =
-    LeagueTournament.currentSplitSeason
+let getSplitTitle league : string =
+    let leagueType = getLeagueType league
+    LeagueTournament.currentSplitSeason leagueType
 
 let createTeamMatchup team =
     let matchups = getMatchups team
@@ -111,11 +112,7 @@ let createTeamMatchupByCode teamCode =
     createTeamMatchup team
 
 let createAllMatchups league =
-    let leagueType =
-        match league with
-        | "lcs" -> LCS
-        | "lec" -> LEC
-        | _ -> LCS
+    let leagueType = getLeagueType league
 
     let teams = LolTeam.LolTeams leagueType
     

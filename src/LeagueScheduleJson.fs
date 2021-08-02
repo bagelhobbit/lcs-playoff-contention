@@ -9,8 +9,6 @@ open System
 
 type LeagueSchedule = JsonProvider<"src/json/schedule.json", SampleIsList=true>
 
-type League = LCS | LEC | LPL | LCK
-
 
 [<RequireQualifiedAccess>]
 module LeagueSchedule =
@@ -108,7 +106,7 @@ module LeagueSchedule =
                     schedule
 
         let regularSeasonFilter (event: LeagueSchedule.Event) =
-            event.StartTime.Date >= LeagueTournament.mostRecentTournament.StartDate.Date &&
+            event.StartTime.Date >= (LeagueTournament.mostRecentTournament league).StartDate.Date &&
             event.BlockName.Contains "Week"
 
         let regularSeasonEvents =

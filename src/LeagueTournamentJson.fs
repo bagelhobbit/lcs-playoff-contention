@@ -1,20 +1,37 @@
 namespace LeagueTournamentJson
 
 open FSharp.Data
+open Microsoft.FSharp.Reflection
 open System
 
 type LeagueTournaments = JsonProvider<"src/json/tournament.json">
 
+type League = LCS | LEC | LPL | LCK
+
 [<RequireQualifiedAccess>]
 module LeagueTournament =  
 
-    let mostRecentTournament =
+
+    let mutable private _lastLeague = LCS
+
+    let mutable private _lastUpdated = DateTime.MinValue
+
+    let mutable private _tournament = None
+
+    let private getMostRecentTournament league =
         let tournamentApi =
-            let naLeagueId = "98767991299243165"
+            let lcsLeagueId = "98767991299243165"
+            let lecLeagueId = "98767991302996019"
+
+            let leagueId = 
+                match league with
+                | LEC -> lecLeagueId
+                | _ -> lcsLeagueId
+                
             let apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
 
             Http.RequestString( "https://esports-api.lolesports.com/persisted/gw/getTournamentsForLeague", httpMethod = "GET",
-                query = [ "hl", "en-US"; "leagueId", naLeagueId],
+                query = [ "hl", "en-US"; "leagueId", leagueId],
                 headers = [ "x-api-key", apiKey] )
 
         let tournaments = LeagueTournaments.Parse(tournamentApi).Data.Leagues.[0].Tournaments
@@ -22,10 +39,33 @@ module LeagueTournament =
         tournaments
         |> Array.maxBy (fun t -> t.StartDate)
 
-    let currentSplitSeason =
+    let mostRecentTournament league = 
+        match _tournament with
+        | None ->
+            let recentTournament = getMostRecentTournament league
+            _tournament <- Some recentTournament
+            _lastLeague <- league
+            _lastUpdated <- DateTime.Now
+            recentTournament
+        | Some tournament ->
+            if (DateTime.Now - _lastUpdated).Days > 1 || _lastLeague <> league 
+            then
+                let recentTournament = getMostRecentTournament league
+                _tournament <- Some recentTournament
+                _lastLeague <- league
+                _lastUpdated <- DateTime.Now
+                recentTournament
+            else 
+                tournament
+
+    let currentSplitSeason league =
         let currentSeason =
-            if mostRecentTournament.Slug.EndsWith("spring") || mostRecentTournament.Slug.EndsWith("split1")
+            if (mostRecentTournament league).Slug.EndsWith("spring") || (mostRecentTournament league).Slug.EndsWith("split1")
             then "Spring"
             else "Summer"
         
-        sprintf "LCS %d %s Split Results"  DateTime.Now.Year currentSeason
+        let leagueName =
+            match FSharpValue.GetUnionFields(league, typeof<League>) with
+            | case, _ -> case.Name
+
+        sprintf "%s %d %s Split Results" leagueName DateTime.Now.Year currentSeason

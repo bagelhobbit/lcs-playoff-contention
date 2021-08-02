@@ -1,7 +1,7 @@
 window.addEventListener('DOMContentLoaded', async () => {
     let target = document.getElementById('target');
 
-    let headerResponse = await fetch('api/getSplitHeader/splitHeader');
+    let headerResponse = await fetch('api/getSplitHeader/splitHeader/lcs');
     let headerText = await headerResponse.text();
     target.insertAdjacentHTML('afterbegin', headerText);
 
