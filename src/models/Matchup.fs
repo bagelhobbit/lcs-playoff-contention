@@ -40,27 +40,24 @@ module Matchups =
             else { Team = opposingTeam; Result = Loss }
 
 
-        let combine results matchup =
-            match results with
-            | [] -> [matchup]
-            | x::xs when x.Team.Code = matchup.Team.Code ->
-                match (x.Result, matchup.Result) with
-                | (Win, Loss) ->  { Team=x.Team; Result=Tie }::xs
-                | (Win, _) ->  { Team=x.Team; Result=Win }::xs
-                | (Loss, Win) ->  { Team=x.Team; Result=Tie }::xs
-                | (Loss, _) ->  { Team=x.Team; Result=Loss }::xs
-                | (Tie, Win) ->  { Team=x.Team; Result=Win }::xs
-                | (Tie, Loss) ->  { Team=x.Team; Result=Loss }::xs
-                | (Tie, Tie) ->  { Team=x.Team; Result=Tie }::xs
-                | (NA, result) -> { Team=x.Team; Result=result }::xs
-                | (_, NA) -> { Team=x.Team; Result=NA }::xs
-            | xs -> matchup::xs
+        let combine (_, matchups) =
+            let totalGames = matchups |> List.length
+            let wins = matchups |> List.filter ( fun y -> y.Result = Win) |> List.length
+            match (totalGames - wins) with
+            | 0 -> { Team = matchups.[0].Team; Result = Win }
+            | x when (single)x < ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Win }
+            | x when (single)x = ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Tie }
+            | x when (single)x > ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Loss }
+            | _ -> { Team = matchups.[0].Team; Result = NA }
 
         pastEvents
-        |> Array.filter (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) )
-        |> Array.map createMatchup
-        |> Array.sortBy (fun result -> result.Team.Code)
-        |> Array.fold combine []
+        |> Array.toList
+        |> List.filter (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) )
+        |> List.map createMatchup
+        |> List.sortBy (fun result -> result.Team.Code)
+        |> List.groupBy (fun x -> x.Team.Code)
+        |> List.map combine
+
 
     let toJson matchup =
         let matchupResult =
@@ -78,6 +75,9 @@ module Matchups =
 [<RequireQualifiedAccess>]
 module MatchupResult =
 
+    // TODO: Better method for determining head-to-head matchup
+    // does have accurate results except at/near end of season
+    // doesn't handle differnce in # games played in spring vs summer
     let create team1 team2 pastEvents =
         let teamCode1 = team1.Code
         let teamCode2 = team2.Code
