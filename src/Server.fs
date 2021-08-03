@@ -15,6 +15,8 @@ let getLeagueType (league: string) =
     match league.ToLower() with
     | "lcs" -> LCS
     | "lec" -> LEC
+    | "lpl" -> LPL
+    | "lck" -> LCK
     | _ -> LCS
 
 let getCurrentRecords sortType league: TeamRecord list =
@@ -82,9 +84,9 @@ let getPlayoffStatuses (league, sort) : PlayoffStatus list =
             |> List.map (List.contains team.LolTeam)
 
         match containsTeam with
-        | _::[x] when x -> { Status = Clinched; Team = team }
-        | x::_ when x -> { Status = Eliminated; Team = team }
-        | _ -> { Status = Unknown; Team = team }
+        | _::[x] when x -> { Status = Clinched; League = leagueType; Team = team }
+        | x::_ when x -> { Status = Eliminated; League = leagueType; Team = team }
+        | _ -> { Status = Unknown; League = leagueType; Team = team }
 
     teamRecords
     |> List.map assignPlayoffStatus

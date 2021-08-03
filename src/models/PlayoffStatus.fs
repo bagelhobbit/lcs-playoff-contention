@@ -15,5 +15,6 @@ type PlayoffContentionStatus =
 type PlayoffStatus =
     {
         Status : PlayoffContentionStatus
+        League : League
         Team : TeamRecord
     }

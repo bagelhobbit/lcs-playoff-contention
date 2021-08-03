@@ -5,7 +5,13 @@ function updateLeague(leagueName) {
         element.textContent = leagueName + element.textContent.substring(3);
     });
     document.getElementById('matchup-link').setAttribute('href', "/matchups/" + leagueName.toLocaleLowerCase())
-    // TODO: Hide record type tabs for leagues other than LCS?
+
+    if(leagueName != 'LCS'){
+        document.getElementById('tab-update').style = "display: none";
+    }
+    else {
+        document.getElementById('tab-update').style = "";
+    }
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -47,10 +53,14 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     let lcs = document.getElementById('lcs');
     let lec = document.getElementById('lec');
+    let lpl = document.getElementById('lpl');
+    let lck = document.getElementById('lck');
 
     lcs.addEventListener('click', async () => {
         lcs.parentElement.classList.add('is-active');
         lec.parentElement.classList.remove('is-active');
+        lpl.parentElement.classList.remove('is-active');
+        lck.parentElement.classList.remove('is-active');
 
         updateLeague(lcs.textContent)
     });
@@ -58,8 +68,28 @@ window.addEventListener('DOMContentLoaded', async () => {
     lec.addEventListener('click', async () => {
         lec.parentElement.classList.add('is-active');
         lcs.parentElement.classList.remove('is-active');
+        lpl.parentElement.classList.remove('is-active');
+        lck.parentElement.classList.remove('is-active');
 
         updateLeague(lec.textContent)
+    });
+
+    lpl.addEventListener('click', async () => {
+        lpl.parentElement.classList.add('is-active');
+        lcs.parentElement.classList.remove('is-active');
+        lec.parentElement.classList.remove('is-active');
+        lck.parentElement.classList.remove('is-active');
+
+        updateLeague(lpl.textContent)
+    });
+
+    lck.addEventListener('click', async () => {
+        lck.parentElement.classList.add('is-active');
+        lcs.parentElement.classList.remove('is-active');
+        lec.parentElement.classList.remove('is-active');
+        lpl.parentElement.classList.remove('is-active');
+
+        updateLeague(lck.textContent)
     });
 });
 

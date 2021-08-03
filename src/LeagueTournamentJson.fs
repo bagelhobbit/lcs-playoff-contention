@@ -21,10 +21,14 @@ module LeagueTournament =
         let tournamentApi =
             let lcsLeagueId = "98767991299243165"
             let lecLeagueId = "98767991302996019"
+            let lplLeagueId = "98767991314006698"
+            let lckLeagueId = "98767991310872058"
 
             let leagueId = 
                 match league with
                 | LEC -> lecLeagueId
+                | LPL -> lplLeagueId
+                | LCK -> lckLeagueId
                 | _ -> lcsLeagueId
                 
             let apiKey = "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z"
