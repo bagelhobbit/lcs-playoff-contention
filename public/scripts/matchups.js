@@ -1,5 +1,5 @@
-async function createTable() {
-    let response = await fetch('api/matchups/matchups');
+async function createTable(leagueName) {
+    let response = await fetch('/api/matchups/' + leagueName);
     let teams = await response.json();
 
     let target = document.getElementById('target')
@@ -7,8 +7,7 @@ async function createTable() {
     let rows = ''
     let teamIndex = 0
     for (let matchup of teams) {
-        console.log(matchup.matchups)
-        let teamMatchupLink = '<a href="/matchups/' + matchup.teamCode + '">' + matchup.team + '</a>'
+        let teamMatchupLink = '<a href="/matchups/' + matchup.league + '/' + matchup.teamCode + '">' + matchup.team + '</a>'
         header += '<th>' + teamMatchupLink + '</th>'
         rows += '<tr><th>' + teamMatchupLink + '</th>'
         let rowIndex = 0

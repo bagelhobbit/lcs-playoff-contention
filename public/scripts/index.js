@@ -1,10 +1,21 @@
+function updateLeague(leagueName) {
+    let recordType = document.querySelector("#tab-update>ul>.is-active>a").id;
+    document.getElementById(recordType).click();
+    document.querySelectorAll(".has-league").forEach((element) => {
+        element.textContent = leagueName + element.textContent.substring(3);
+    });
+    document.getElementById('matchup-link').setAttribute('href', "/matchups/" + leagueName.toLocaleLowerCase())
+    // TODO: Hide record type tabs for leagues other than LCS?
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
     let target = document.getElementById('target');
 
-    let headerResponse = await fetch('api/getSplitHeader/splitHeader/lcs');
+    let headerResponse = await fetch('api/getSplitHeader/splitHeader');
     let headerText = await headerResponse.text();
     target.insertAdjacentHTML('afterbegin', headerText);
 
+    // Use cookie to store current league
     let statusResponse = await fetch('api/getPlayoffStatuses/lcs/all/');
     let statusText = await statusResponse.text();
     target.insertAdjacentHTML('beforeend', statusText);
@@ -41,16 +52,14 @@ window.addEventListener('DOMContentLoaded', async () => {
         lcs.parentElement.classList.add('is-active');
         lec.parentElement.classList.remove('is-active');
 
-        let recordType = document.querySelector("#tab-update>ul>.is-active>a").id;
-        document.getElementById(recordType).click();
+        updateLeague(lcs.textContent)
     });
 
     lec.addEventListener('click', async () => {
         lec.parentElement.classList.add('is-active');
         lcs.parentElement.classList.remove('is-active');
 
-        let recordType = document.querySelector("#tab-update>ul>.is-active>a").id;
-        document.getElementById(recordType).click();
+        updateLeague(lec.textContent)
     });
 });
 

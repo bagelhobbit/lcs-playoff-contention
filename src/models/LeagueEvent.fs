@@ -5,7 +5,7 @@ open System
 
 type EventState = Completed | Unstarted
 
-type League = 
+type LeagueSeason = 
     { Name: string
       Slug: string }
 
@@ -37,5 +37,5 @@ type LeagueEvent =
       State: EventState
       Type: string
       BlockName: string
-      League: League
+      League: LeagueSeason
       Match: Match }

@@ -1,15 +1,17 @@
 namespace Models
 
 type TeamMatchup =
-    { Team : string
+    { League: League
+      Team : string
       TeamCode : string
       Matchups : Matchup list }
 
 
 module TeamMatchups =
 
-    let create matchups team =
+    let create league matchups team =
         {
+            League = league
             Team = team.Name
             TeamCode = team.Code
             Matchups = matchups
@@ -29,7 +31,7 @@ module TeamMatchups =
                     |> List.map Matchups.toJson
                     |> List.fold fold ""
 
-                sprintf "{ \"team\" : \"%s\", \"teamCode\" : \"%s\", \"matchups\" : [%s] }" matchup.Team matchup.TeamCode matchups
+                sprintf "{ \"league\" : \"%A\", \"team\" : \"%s\", \"teamCode\" : \"%s\", \"matchups\" : [%s] }" matchup.League matchup.Team matchup.TeamCode matchups
 
             matchups
             |> Array.sortBy ( fun m -> m.Team )

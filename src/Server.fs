@@ -11,8 +11,8 @@ open PlayoffTeams
 
 type RecordSort = Cumulative | Split 
 
-let getLeagueType league =
-    match league with
+let getLeagueType (league: string) =
+    match league.ToLower() with
     | "lcs" -> LCS
     | "lec" -> LEC
     | _ -> LCS
@@ -28,7 +28,7 @@ let getCurrentRecords sortType league: TeamRecord list =
         // Reverse the comparer so teams with a better head to head record are at the top
         if team1.WinLoss = team2.WinLoss
         then 
-            let headToHead = MatchupResult.create team1.LcsTeam team2.LcsTeam lcsResults
+            let headToHead = MatchupResult.create team1.LolTeam team2.LolTeam lcsResults
 
             match headToHead with
             | Win -> -1
@@ -70,16 +70,16 @@ let getPlayoffStatuses (league, sort) : PlayoffStatus list =
 
     let eliminatedTeams = 
         findEliminatedTeams teamRecords remainingSchedule
-        |> List.map (fun team -> team.LcsTeam)
+        |> List.map (fun team -> team.LolTeam)
 
     let playoffTeams =
         findPlayoffTeams teamRecords
-        |> List.map (fun team -> team.LcsTeam)
+        |> List.map (fun team -> team.LolTeam)
 
     let assignPlayoffStatus team =
         let containsTeam =
             [ eliminatedTeams; playoffTeams]
-            |> List.map (List.contains team.LcsTeam)
+            |> List.map (List.contains team.LolTeam)
 
         match containsTeam with
         | _::[x] when x -> { Status = Clinched; Team = team }
@@ -89,13 +89,13 @@ let getPlayoffStatuses (league, sort) : PlayoffStatus list =
     teamRecords
     |> List.map assignPlayoffStatus
 
-let getMatchups team : Matchup list =
-    let lcsResults = 
-        LeagueSchedule.getSchedule LCS
+let getMatchups league team : Matchup list =
+    let lolResults = 
+        LeagueSchedule.getSchedule league
         |> Array.filter (fun event -> event.State = LeagueSchedule.StateCompleted)
         |> Array.map LeagueSchedule.create
 
-    Matchups.create team lcsResults
+    Matchups.create team lolResults
     |> List.sortBy (fun matchup -> matchup.Team.Code)
     |> List.sortBy (fun matchup -> matchup.Result)
 
@@ -103,13 +103,14 @@ let getSplitTitle league : string =
     let leagueType = getLeagueType league
     LeagueTournament.currentSplitSeason leagueType
 
-let createTeamMatchup team =
-    let matchups = getMatchups team
-    TeamMatchups.create matchups team
+let createTeamMatchup league team =
+    let matchups = getMatchups league team
+    TeamMatchups.create league matchups team
 
-let createTeamMatchupByCode teamCode =
-    let team = { Name = ""; Code = teamCode; Image = "" }
-    createTeamMatchup team
+let createTeamMatchupByCode (league, teamCode: string) =
+    let team = { Name = ""; Code = teamCode.ToUpper(); Image = "" }
+    let leagueType = getLeagueType league
+    createTeamMatchup leagueType team
 
 let createAllMatchups league =
     let leagueType = getLeagueType league
@@ -129,7 +130,7 @@ let createAllMatchups league =
 
     let matchups =
         sortedTeams
-        |> Array.map createTeamMatchup
+        |> Array.map (createTeamMatchup leagueType)
 
     let filledMatchups =
         matchups

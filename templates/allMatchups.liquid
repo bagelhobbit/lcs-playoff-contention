@@ -1,20 +1,21 @@
+{% capture league %}{{ model }}{% endcapture %}
 {% include "_matchup_page_start.liquid" %}
 <section class="section">
     <div>
         <nav class="breadcrumb is-medium">
             <ul>
                 <li class=""><a href="/" style="cursor: pointer;">Home</a></li>
-                <li class="is-active"><a>Matchups</a></li>
+                <li class="is-active"><a class="has-league">{{model}} Matchups</a></li>
             </ul>
         </nav>
         <div class="container">
             <div class="content has-text-centered">
-                <h2 class="title is-2">LCS Split Head to Head Matchups</h2>
+                <h2 class="title is-2 has-league">{{model}} Head to Head Matchups</h2>
             </div>
         </div>
         
         <div id="target">
-        <script>createTable();</script>
+        <script>createTable("{{model}}");</script>
         </div>
     </div>
 </section>

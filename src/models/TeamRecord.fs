@@ -4,7 +4,7 @@ namespace Models
 type WinLoss = { Wins: int; Losses: int }
 type LcsResult = { Opponent: LolTeam; Won: bool }
 type TeamRecord = 
-    { LcsTeam: LolTeam
+    { LolTeam: LolTeam
       WinLoss: WinLoss
       SplitWinLoss: WinLoss
       Results: LcsResult list }
@@ -60,7 +60,7 @@ module TeamRecord =
         |> fun (wins, lossess) -> { Wins = wins |> Array.length; Losses = lossess |> Array.length }
 
     let create events team =
-        { LcsTeam = team
+        { LolTeam = team
           WinLoss = createWinLoss team.Code events
           SplitWinLoss = createSplitWinLoss team.Code events
           Results = createLcsResults team.Code events }

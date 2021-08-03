@@ -31,9 +31,9 @@ let findEliminatedTeams teamRecords futureSchedule =
             teamRecords
             |> List.filter (fun team -> team.WinLoss.Wins = minWins)
             |> List.pairwise
-            |> List.filter (fun (team1, team2) -> Seq.exists (filterFutureSchedule team1.LcsTeam team2.LcsTeam) futureSchedule)
+            |> List.filter (fun (team1, team2) -> Seq.exists (filterFutureSchedule team1.LolTeam team2.LolTeam) futureSchedule)
             |> unpairwise
-            |> List.map (fun team -> team.LcsTeam)
+            |> List.map (fun team -> team.LolTeam)
 
         match tiedPotentialContenders with
         | [] -> minWins
