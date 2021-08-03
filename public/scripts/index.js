@@ -11,7 +11,7 @@ function updateLeague(leagueName) {
 window.addEventListener('DOMContentLoaded', async () => {
     let target = document.getElementById('target');
 
-    let headerResponse = await fetch('api/getSplitHeader/splitHeader');
+    let headerResponse = await fetch('api/getSplitHeader/lcs');
     let headerText = await headerResponse.text();
     target.insertAdjacentHTML('afterbegin', headerText);
 

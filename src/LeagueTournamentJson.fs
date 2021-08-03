@@ -1,12 +1,11 @@
 namespace LeagueTournamentJson
 
 open FSharp.Data
-open Microsoft.FSharp.Reflection
 open System
+open Models
 
 type LeagueTournaments = JsonProvider<"src/json/tournament.json">
 
-type League = LCS | LEC | LPL | LCK
 
 [<RequireQualifiedAccess>]
 module LeagueTournament =  
@@ -63,9 +62,5 @@ module LeagueTournament =
             if (mostRecentTournament league).Slug.EndsWith("spring") || (mostRecentTournament league).Slug.EndsWith("split1")
             then "Spring"
             else "Summer"
-        
-        let leagueName =
-            match FSharpValue.GetUnionFields(league, typeof<League>) with
-            | case, _ -> case.Name
 
-        sprintf "%s %d %s Split Results" leagueName DateTime.Now.Year currentSeason
+        sprintf "%A %d %s Split Results" league DateTime.Now.Year currentSeason
