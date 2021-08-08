@@ -22,8 +22,8 @@ let app =
           GET >=> pathScan "/api/matchups/%s" (createAllMatchups >> TeamMatchups.toJson >> OK)
           GET >=> pathScan "/matchups/%s/%s" (createTeamMatchupByCode >> page "teamMatchup.liquid")
           GET >=> pathScan "/matchups/%s" (( fun s -> s.ToUpper() ) >> page "allMatchups.liquid")
-          GET >=> Files.browseHome
-          NOT_FOUND "Found no handlers."
+          GET >=> pathScan "/%s" Files.browseFileHome
+          NOT_FOUND "Page not found."
       ]
 
 
