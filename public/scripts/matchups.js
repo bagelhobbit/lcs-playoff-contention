@@ -39,5 +39,6 @@ async function createTable(leagueName) {
         teamIndex++
     }
     let text = '<table>' + header + rows + '</table>'
+    document.querySelector(".loader").style = "display: none;";
     target.insertAdjacentHTML('afterbegin', text)
 }

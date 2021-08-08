@@ -16,7 +16,11 @@ open Server
 let app =
     choose 
       [
-          GET >=> path "/" >=> Files.sendFile "./public/html/index.html" true
+          GET >=> path "/" >=> (page "index.liquid" "LCS")
+          GET >=> pathCi "/lcs" >=> (page "index.liquid" "LCS")
+          GET >=> pathCi "/lec" >=> (page "index.liquid" "LEC")
+          GET >=> pathCi "/lpl" >=> (page "index.liquid" "LPL")
+          GET >=> pathCi "/lck" >=> (page "index.liquid" "LCK")
           GET >=> pathScan "/api/getSplitHeader/%s" (getSplitTitle >> page "splitHeader.liquid")
           GET >=> pathScan "/api/getPlayoffStatuses/%s/%s" (getPlayoffStatuses >> page "teamRecords.liquid")
           GET >=> pathScan "/api/matchups/%s" (createAllMatchups >> TeamMatchups.toJson >> OK)

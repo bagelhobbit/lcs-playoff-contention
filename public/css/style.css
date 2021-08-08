@@ -1,91 +1,14 @@
-/* This should be generated from src/client/style.sass */
-.legend-eliminated::before,
-.legend-clinched::before {
-    content: "";
-    display: inline-block;
-    height: 16px;
-    margin-left: 8px;
-    margin-right: 4px;
-    width: 16px
+.loader {
+    left: 50%;
+    border: 8px solid #F3F3F3;
+    border-top: 8px solid #3495DB;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1.5s linear infinite;
 }
 
-.team-eliminated,
-.team-clinched,
-.team {
-    border-radius: 4px
-}
-
-.team-eliminated:not(:last-child),
-.team-clinched:not(:last-child),
-.team:not(:last-child) {
-    margin-bottom: 1.5rem
-}
-
-.team-eliminated:first-child,
-.team-clinched:first-child,
-.team:first-child {
-    margin-top: 1.5rem
-}
-
-.team-eliminated,
-.team-clinched {
-    border-left-style: solid;
-    border-left-width: thick
-}
-
-.team-clinched {
-    border-left-color: #3273dc
-}
-
-.team-eliminated {
-    border-left-color: #ff3860
-}
-
-.legend-clinched,
-.legend-eliminated {
-    display: inline-block;
-    line-height: 1.5
-}
-
-.legend-clinched::before {
-    background-color: #3273dc
-}
-
-.legend-eliminated::before {
-    background-color: #ff3860
-}
-
-.tile.is-child>a:hover {
-    text-decoration: underline
-}
-
-.split-title {
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-}
-
-table {
-    margin: auto;
-    width: 75%;
-}
-
-table th, table td {
-    padding: 8px;
-    text-align: center;
-}
-
-table th:not(:last-child), table td:not(:last-child) {
-    border-right: 1px solid black;
-}
-
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-th>a {
-    color: black;
-}
-
-th>a:hover {
-    text-decoration: underline;
+@keyframes spin {
+    0% {transform: rotate(0deg);}
+    100% {transform: rotate(360deg);}
 }
