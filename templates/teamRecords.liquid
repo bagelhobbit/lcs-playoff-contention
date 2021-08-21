@@ -8,7 +8,7 @@
     <div class="tile has-background-white-ter team is-parent">
     {% endif %}
         <div class="tile is-child"><a href="/matchups/{{playoffStatus.League}}/{{playoffStatus.Team.LolTeam.Code}}" style="cursor: pointer;">
-                <div class="title is-4">{{playoffStatus.Team.LolTeam.Code}}</div>
+                <div class="title is-4"><abbr title="{{playoffStatus.Team.LolTeam.Name}}">{{playoffStatus.Team.LolTeam.Code}}</abbr></div>
                 {% if playoffStatus.Team.WinLoss.Wins == playoffStatus.Team.SplitWinLoss.Wins && playoffStatus.Team.WinLoss.Losses == playoffStatus.Team.SplitWinLoss.Losses %}          
                 <div class="title is-6">{{playoffStatus.Team.WinLoss.Wins}}-{{playoffStatus.Team.WinLoss.Losses}}</div>
                 {% else %}
