@@ -128,7 +128,8 @@ let createAllMatchups league =
         |> Array.map ( fun team -> { 
             Team = { Code = team.Code; Name = team.Name; 
                      Result = { Outcome = ""; GameWins = 0 }; Record = { Wins = 0; Losses = 0 } }
-            Result = NA } )
+            Result = NA
+            MatchResults = "" } )
 
     let matchups =
         sortedTeams

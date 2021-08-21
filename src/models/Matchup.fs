@@ -13,7 +13,7 @@ type MatchupResult =
             | Loss -> "Loss" :> obj
             | NA -> "-" :> obj
 
-type Matchup = { Team: Team; Result: MatchupResult }
+type Matchup = { Team: Team; Result: MatchupResult; MatchResults: string }
 
 
 [<RequireQualifiedAccess>]
@@ -35,27 +35,41 @@ module Matchups =
                 |> List.partition (fun team -> team.Code = teamCode)
                 |> fun (current, opposing) -> (current |> List.exactlyOne, opposing |> List.exactlyOne)
 
+            let gameResults =
+                if (opposingTeam.Result.GameWins + currentTeam.Result.GameWins >= 2)
+                then sprintf "(%d-%d)" currentTeam.Result.GameWins opposingTeam.Result.GameWins
+                else ""
+
             if (teamWon currentTeam)
-            then { Team = opposingTeam; Result = Win }
-            else { Team = opposingTeam; Result = Loss }
+            then ({ Team = opposingTeam; Result = Win; MatchResults = sprintf "%A" Win }, gameResults)
+            else ({ Team = opposingTeam; Result = Loss; MatchResults =  sprintf "%A" Loss }, gameResults)
 
 
-        let combine (_, matchups) =
+        let combine (_, results) =
+            let stringifyResults matchupResults =
+                let joinResults acc (matchup, result) =
+                    match acc with
+                    | "" -> sprintf "%A%s" matchup.Result result
+                    | _ -> sprintf "%s - %A%s" acc matchup.Result result
+
+                matchupResults |> List.fold joinResults "" 
+
+            let matchups = results |> List.map (fun (m,_) -> m )
+
             let totalGames = matchups |> List.length
             let wins = matchups |> List.filter ( fun y -> y.Result = Win) |> List.length
             match (totalGames - wins) with
-            | 0 -> { Team = matchups.[0].Team; Result = Win }
-            | x when (single)x < ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Win }
-            | x when (single)x = ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Tie }
-            | x when (single)x > ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Loss }
-            | _ -> { Team = matchups.[0].Team; Result = NA }
+            | 0 -> { Team = matchups.[0].Team; Result = Win; MatchResults = stringifyResults results }
+            | x when (single)x < ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Win; MatchResults = stringifyResults results }
+            | x when (single)x = ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Tie; MatchResults = stringifyResults results }
+            | x when (single)x > ((single)totalGames / 2.0f) -> { Team = matchups.[0].Team; Result = Loss; MatchResults = stringifyResults results }
+            | _ -> { Team = matchups.[0].Team; Result = NA; MatchResults = stringifyResults results }
 
         pastEvents
         |> Array.toList
-        |> List.filter (fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) )
+        |> List.filter ( fun event -> event.Match.Teams |> List.exists (fun team -> team.Code = teamCode) )
         |> List.map createMatchup
-        |> List.sortBy (fun result -> result.Team.Code)
-        |> List.groupBy (fun x -> x.Team.Code)
+        |> List.groupBy (fun (x, _) -> x.Team.Code)
         |> List.map combine
 
 
@@ -76,8 +90,8 @@ module Matchups =
 module MatchupResult =
 
     // TODO: Better method for determining head-to-head matchup
-    // does have accurate results except at/near end of season
-    // doesn't handle differnce in # games played in spring vs summer
+    // doesn't have accurate results except at/near end of season
+    // doesn't handle difference in # games played in spring vs summer
     let create team1 team2 pastEvents =
         let teamCode1 = team1.Code
         let teamCode2 = team2.Code

@@ -23,7 +23,7 @@
         <div class="tile has-background-white-ter is-parent">
             {% for matchup in model.Matchups %}
             <div class="tile is-child">
-                <h4 class="title is-4">{{matchup.Team.Code}}</h4>
+                <h4 class="title is-4"><abbr title="{{ matchup.MatchResults }}">{{matchup.Team.Code}}</abbr></h4>
                 {% if matchup.Result == "Win" %}
                 <h6 class="title has-text-success is-6">Won</h6>
                 {% elsif matchup.Result == "Tie" %}
